@@ -1,7 +1,7 @@
 {
   "name": "@dgck81lnn/koishi-plugin-xdi8",
-  "description": "希顶语与汉字互转",
-  "version": "0.1.0",
+  "description": "Shidinn transcriber for koishi",
+  "version": "0.1.1",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -9,6 +9,11 @@
     "dist"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/DGCK81LNN/koishi-plugin-xdi8",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DGCK81LNN/koishi-plugin-xdi8.git"
+  },
   "scripts": {},
   "keywords": [
     "chatbot",
@@ -16,6 +21,16 @@
     "plugin",
     "shidinn"
   ],
+  "koishi": {
+    "browser": true,
+    "description": {
+      "en": "Shidinn transcriber",
+      "zh": "希顶语与汉字互转"
+    },
+    "locales": [
+      "zh"
+    ]
+  },
   "peerDependencies": {
     "koishi": "^4.16.1"
   },
