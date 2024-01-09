@@ -60,6 +60,7 @@ export function apply(ctx: Context) {
             return true
           })
         } else if (
+          sourceType === "x" &&
           seg.some(alt => alt.content.some(seg => Object.hasOwn(ahoFixes, seg.x)))
         ) {
           // aho fix when `all` flag is not set: move non-preferred forms to bottom
@@ -144,18 +145,5 @@ export function apply(ctx: Context) {
       return stringifyResult(session, xhResultCompact, "x", options)
     })
 
-  ctx.i18n.define("zh", "commands.xdi8", {
-    description: "汉字希顶互转",
-    usage:
-      "在文本前添加选项“-a”（与文本和指令名“xdi8”之间用空格隔开）来显示隐藏的结果，包括过时拼写和例外结果。加“-A”可显示例外结果，但不包含过时拼写。\n" +
-      "“例外结果”包括希转汉时的部分繁体字和汉转希时多音字的罕见读音。\n" +
-      "当文本为单个汉字或不包含空格的希顶“词”时，会默认显示所有隐藏结果。",
-    options: {
-      all: "总是显示所有隐藏结果",
-      almostAll: "总是显示例外结果（不包括过时拼写）",
-    },
-    messages: {
-      "no-result": "未找到可转换的字词。",
-    },
-  })
+  ctx.i18n.define("zh", require("./locales/zh"))
 }

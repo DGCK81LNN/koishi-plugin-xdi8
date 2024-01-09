@@ -1,7 +1,7 @@
 {
   "name": "@dgck81lnn/koishi-plugin-xdi8",
   "description": "Shidinn transcriber for koishi",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -14,7 +14,6 @@
     "type": "git",
     "url": "git+https://github.com/DGCK81LNN/koishi-plugin-xdi8.git"
   },
-  "scripts": {},
   "keywords": [
     "chatbot",
     "koishi",
@@ -35,6 +34,6 @@
     "koishi": "^4.16.1"
   },
   "dependencies": {
-    "xdi8-transcriber": "file:../../../../soul/xdi8-transcriber/package"
+    "xdi8-transcriber": "^0.2.1"
   }
 }
