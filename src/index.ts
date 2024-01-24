@@ -1,4 +1,4 @@
-import { Context, Schema, Session } from "koishi"
+import { Context, Schema, Session, h } from "koishi"
 import {
   Alternation,
   HanziToXdi8Transcriber,
@@ -8,9 +8,15 @@ import {
 
 export const name = "xdi8"
 
-export interface Config {}
+export interface Config {
+  footnotesInSeparateMessage: boolean
+}
 
-export const Config: Schema<Config> = Schema.object({})
+export const Config: Schema<Config> = Schema.object({
+  footnotesInSeparateMessage: Schema.boolean()
+    .description("是否将结果正文与脚注分成两条消息发送。")
+    .default(true),
+})
 
 function supNum(n: number) {
   return Array.from(String(0 | n), (d: `${number}`) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]).join("")
@@ -19,7 +25,7 @@ function supNum(n: number) {
 let hxTranscriber: HanziToXdi8Transcriber
 let xhTranscriber: Xdi8ToHanziTranscriber
 
-export function apply(ctx: Context) {
+export function apply(ctx: Context, config: Config) {
   /**
    * Dict of shidinn spellings and their preferred hanzi forms.
    *
@@ -107,8 +113,11 @@ export function apply(ctx: Context) {
       return `${source}:\n${alts.join("\n")}`
     })
 
-    if (single && footnotes.length === 1) return footnotes[0]
-    return `${text}\n${footnotes.map((fn, i) => `[${i + 1}] ${fn}`).join("\n")}`
+    if (single && footnotes.length === 1) return h.text(footnotes[0])
+
+    return [text, footnotes.map((fn, i) => `[${i + 1}] ${fn}`).join("\n")]
+      .map(s => h.escape(s))
+      .join(config.footnotesInSeparateMessage ? "<message />" : "\n")
   }
 
   function getResultScore(result: TranscribeResult) {
