@@ -138,6 +138,19 @@ export function apply(ctx: Context, config: Config) {
     .option("all", "-a")
     .option("almostAll", "-A")
     .action(({ options, session }, text) => {
+      text = h
+        .transform(text.replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
+          text: true,
+          img: "\ufdd0",
+          image: "\ufdd0",
+          face: "\ufdd0",
+          default: false,
+        })
+        .replace(/(\s?)\ufdd0(\s?)/g, (_, l, r) => l + r || " ")
+        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "\ufdd0$&\ufdd1")
+        .replace(/[⁽]?\ufdd0/g, "⁽")
+        .replace(/\ufdd1[⁾]?/g, "⁾")
+
       hxTranscriber ||= new HanziToXdi8Transcriber()
       xhTranscriber ||= new Xdi8ToHanziTranscriber()
 
