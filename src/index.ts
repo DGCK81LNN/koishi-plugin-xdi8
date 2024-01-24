@@ -147,9 +147,7 @@ export function apply(ctx: Context, config: Config) {
           default: false,
         })
         .replace(/(\s?)\ufdd0(\s?)/g, (_, l, r) => l + r || " ")
-        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "\ufdd0$&\ufdd1")
-        .replace(/[⁽]?\ufdd0/g, "⁽")
-        .replace(/\ufdd1[⁾]?/g, "⁾")
+        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
       hxTranscriber ||= new HanziToXdi8Transcriber()
       xhTranscriber ||= new Xdi8ToHanziTranscriber()
