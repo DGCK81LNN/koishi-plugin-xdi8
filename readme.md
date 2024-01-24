@@ -43,6 +43,9 @@ dDE（名词 dì）
 
 ```
 nAF jbia¹ mzu3² HB2  hu8H pio³ mb1 qT
+```
+
+```
 [1] 发:
 jbia（“髪”的简化字 fà）
 pio（“發”的简化字 fā）
