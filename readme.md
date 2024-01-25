@@ -1,6 +1,6 @@
-# @dgck81lnn/koishi-plugin-xdi8
+# koishi-plugin-xdi8
 
-[![npm](https://img.shields.io/npm/v/@dgck81lnn/koishi-plugin-xdi8?style=flat-square)](https://www.npmjs.com/package/@dgck81lnn/koishi-plugin-xdi8)
+[![npm](https://img.shields.io/npm/v/koishi-plugin-xdi8?style=flat-square)](https://www.npmjs.com/package/koishi-plugin-xdi8)
 
 希顶语与汉字互转
 
