@@ -134,35 +134,33 @@ export function apply(ctx: Context, config: Config) {
     checkUnknown: true,
     showWarning: true,
   })
-  cmdXdi8
-    .option("all", "-a")
-    .action(({ options, session }, text) => {
-      text = h
-        .transform(text.replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
-          text: true,
-          img: "\ufdd0",
-          image: "\ufdd0",
-          face: "\ufdd0",
-          default: false,
-        })
-        .replace(/(\s?)\ufdd0(\s?)/g, (_, l, r) => l + r || " ")
-        .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
+  cmdXdi8.option("all", "-a").action(({ options, session }, text) => {
+    text = h
+      .transform(text.replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
+        text: true,
+        img: "\ufdd0",
+        image: "\ufdd0",
+        face: "\ufdd0",
+        default: false,
+      })
+      .replace(/(\s?)\ufdd0(\s?)/g, (_, l, r) => l + r || " ")
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
-      hxTranscriber ||= new HanziToXdi8Transcriber()
-      xhTranscriber ||= new Xdi8ToHanziTranscriber()
+    hxTranscriber ||= new HanziToXdi8Transcriber()
+    xhTranscriber ||= new Xdi8ToHanziTranscriber()
 
-      const hxResult = hxTranscriber.transcribe(text, { ziSeparator: " " })
-      const hxScore = getResultScore(hxResult)
-      const xhResult = xhTranscriber.transcribe(text, { alphaFilter: null })
-      const xhScore = getResultScore(xhResult)
+    const hxResult = hxTranscriber.transcribe(text, { ziSeparator: " " })
+    const hxScore = getResultScore(hxResult)
+    const xhResult = xhTranscriber.transcribe(text, { alphaFilter: null })
+    const xhScore = getResultScore(xhResult)
 
-      if (!hxScore && !xhScore) return session.text(".no-result")
+    if (!hxScore && !xhScore) return session.text(".no-result")
 
-      if (hxScore > xhScore) return stringifyResult(session, hxResult, "h", options)
+    if (hxScore > xhScore) return stringifyResult(session, hxResult, "h", options)
 
-      const xhResultCompact = xhResult.filter(seg => seg !== " ")
-      return stringifyResult(session, xhResultCompact, "x", options)
-    })
+    const xhResultCompact = xhResult.filter(seg => seg !== " ")
+    return stringifyResult(session, xhResultCompact, "x", options)
+  })
 
   ctx.i18n.define("zh", require("./locales/zh"))
 }
