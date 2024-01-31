@@ -43,12 +43,12 @@ export function apply(ctx: Context, config: Config) {
     session: Session,
     result: TranscribeResult,
     sourceType: T,
-    { all = false, almostAll = false }
+    { all = false }
   ) {
     const single = result.length === 1 && Array.isArray(result[0])
 
     const showLegacy = single || all
-    const showExceptional = single || all || almostAll
+    const showExceptional = single || all || sourceType === "h"
     result = result.flatMap(seg => {
       if (Array.isArray(seg)) {
         if (!all) {
@@ -136,7 +136,6 @@ export function apply(ctx: Context, config: Config) {
   })
   cmdXdi8
     .option("all", "-a")
-    .option("almostAll", "-A")
     .action(({ options, session }, text) => {
       text = h
         .transform(text.replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
