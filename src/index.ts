@@ -114,10 +114,11 @@ export function apply(ctx: Context, config: Config) {
       return `${source}:\n${alts.join("\n")}`
     })
 
-    if (single && footnotes.length === 1) return h.text(footnotes[0])
+    if (single && footnotes.length === 1) return h.escape(footnotes[0])
 
     return [text, footnotes.map((fn, i) => `[${i + 1}] ${fn}`).join("\n")]
       .map(s => h.escape(s))
+      .filter(Boolean)
       .join(config.footnotesInSeparateMessage ? "<message />" : "\n")
   }
 
