@@ -5,6 +5,7 @@ import {
   TranscribeResult,
   Xdi8ToHanziTranscriber,
 } from "xdi8-transcriber"
+import { stripTags } from "./utils"
 
 export const name = "xdi8"
 
@@ -135,15 +136,7 @@ export function apply(ctx: Context, config: Config) {
     showWarning: true,
   })
   cmdXdi8.option("all", "-a").action(({ options, session }, text) => {
-    text = h
-      .transform(text.replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
-        text: true,
-        img: "\ufdd0",
-        image: "\ufdd0",
-        face: "\ufdd0",
-        default: false,
-      })
-      .replace(/(\s?)\ufdd0(\s?)/g, (_, l, r) => l + r || " ")
+    text = stripTags(text)
       .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
     hxTranscriber ||= new HanziToXdi8Transcriber()
