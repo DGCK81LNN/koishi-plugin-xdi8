@@ -137,8 +137,7 @@ export function apply(ctx: Context, config: Config) {
     showWarning: true,
   })
   cmdXdi8.option("all", "-a").action(({ options, session }, text) => {
-    text = stripTags(text)
-      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
+    text = stripTags(text).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
     hxTranscriber ||= new HanziToXdi8Transcriber()
     xhTranscriber ||= new Xdi8ToHanziTranscriber()
