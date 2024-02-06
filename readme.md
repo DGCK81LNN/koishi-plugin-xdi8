@@ -20,6 +20,24 @@
   >
   >   * -a, --all  显示隐藏结果
 
+## 字表更新
+
+为使转写器的字表保持最新，本插件所使用的库 xdi8-transcriber 需要持续更新。若要更新 xdi8-transcriber，请在 Koishi 的工作目录运行如下指令：
+
+  * **npm:**
+
+        npm update xdi8-transcriber
+
+  * **yarn:**
+
+        yarn up -R xdi8-transcriber
+
+  * **Koishi 启动器:**
+
+    <pre><code>koi yarn -n <mark>default</mark> up -R xdi8-transcriber</code></pre>
+
+    其中“`default`”为 Koishi 实例名称。
+
 ## 示例
 
 `xdi8 萤火虫`
