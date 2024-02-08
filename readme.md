@@ -22,7 +22,7 @@
 
 ## 字表更新
 
-为使转写器的字表保持最新，本插件所使用的库 xdi8-transcriber 需要持续更新。若要更新 xdi8-transcriber，请在 Koishi 的工作目录运行如下指令：
+为使转写器的字表保持最新，本插件所使用的库 xdi8-transcriber 需要持续更新。若要更新 xdi8-transcriber，请在 Koishi 所在目录运行：
 
   * **npm:**
 
@@ -34,7 +34,7 @@
 
   * **Koishi 启动器:**
 
-    <pre><code>koi yarn -n <mark>default</mark> up -R xdi8-transcriber</code></pre>
+    <pre><code>koi yarn -n <mark><i>default</i></mark> up -R xdi8-transcriber</code></pre>
 
     其中“`default`”为 Koishi 实例名称。
 
@@ -87,7 +87,10 @@ NAh:
 麴
 ```
 
-<code>xdi8<br>nAF nE wiY vnuV<br>nE wiY 4i6 n5i6<br>wiY 4i6 wA 56</code>
+<code>xdi8\
+nAF nE wiY vnuV\
+nE wiY 4i6 n5i6\
+wiY 4i6 wA 56</code>
 
 ```
 怒尼威狮
