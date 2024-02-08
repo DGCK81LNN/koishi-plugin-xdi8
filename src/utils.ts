@@ -1,5 +1,18 @@
 import { h } from "koishi"
 
+/**
+ * Dict of shidinn spellings and their preferred hanzi forms.
+ *
+ * Some entries have hanzi froms that include PUA characters which will not
+ * display in plain-text environments. Thus, when characters in this dict are
+ * transcribed to hanzi, only the preferred hanzi forms will be shown --
+ * unless the `all` flag is set, in which case they are moved to the end of
+ * the alternations array instead.
+ */
+export const ahoFixes: Record<string, string[]> = {
+  aho: ["纟火", "糹火"],
+}
+
 export function stripTags(text: string) {
   return (
     h

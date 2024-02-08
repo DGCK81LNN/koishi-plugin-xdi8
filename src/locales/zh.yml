@@ -10,3 +10,18 @@ commands:
       all: 显示隐藏结果
     messages:
       no-result: 未找到可转换的字词。
+  xdi8-grep:
+    description: 从字表正则搜索希顶词
+    arguments:
+      pattern: 正则表达式
+    usage: |-
+      可以使用以下语法糖匹配特定种类的希顶字母：
+      \c — 声母
+      \g — 介母
+      \v — 韵母
+      例如：“\c\g\v.H”可匹配形如 CGVRH 的希顶词。
+      将转义字母大写以选择补集，如 \C 匹配非声母。
+    messages:
+      no-result: 未找到符合条件的希顶词。
+      invalid-pattern: 无效的正则表达式。
+      result-footer: 共 {0} 条结果。

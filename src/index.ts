@@ -5,18 +5,21 @@ import {
   TranscribeResult,
   Xdi8ToHanziTranscriber,
 } from "xdi8-transcriber"
-import { stripTags } from "./utils"
+import { ahoFixes, stripTags } from "./utils"
+import * as pluginGrep from "./grep"
 
 export const name = "xdi8"
 
 export interface Config {
   footnotesInSeparateMessage: boolean
+  grep: pluginGrep.Config
 }
 
 export const Config: Schema<Config> = Schema.object({
   footnotesInSeparateMessage: Schema.boolean()
     .description("是否将结果正文与脚注分成两条消息发送。")
     .default(true),
+  grep: pluginGrep.Config,
 })
 
 function supNum(n: number) {
@@ -27,19 +30,6 @@ let hxTranscriber: HanziToXdi8Transcriber
 let xhTranscriber: Xdi8ToHanziTranscriber
 
 export function apply(ctx: Context, config: Config) {
-  /**
-   * Dict of shidinn spellings and their preferred hanzi forms.
-   *
-   * Some entries have hanzi froms that include PUA characters which will not
-   * display in plain-text environments. Thus, when characters in this dict are
-   * transcribed to hanzi, only the preferred hanzi forms will be shown --
-   * unless the `all` flag is set, in which case they are moved to the end of
-   * the alternations array instead.
-   */
-  const ahoFixes: Record<string, string[]> = {
-    aho: ["纟火", "糹火"],
-  }
-
   function stringifyResult<T extends "h" | "x">(
     session: Session,
     result: TranscribeResult,
@@ -154,6 +144,8 @@ export function apply(ctx: Context, config: Config) {
     const xhResultCompact = xhResult.filter(seg => seg !== " ")
     return stringifyResult(session, xhResultCompact, "x", options)
   })
+
+  ctx.plugin(pluginGrep, config.grep)
 
   ctx.i18n.define("zh", require("./locales/zh"))
 }
