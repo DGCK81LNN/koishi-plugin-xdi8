@@ -116,39 +116,39 @@ wiY 4i6 wA 56</code>
   >
   > 将转义字母大写以选择补集，如 `\C` 匹配非声母。
 
-显示的搜索结果有数量上限，可在插件配置中更改。超出上限时将随机抽取指定数量的结果显示，但正常拼写优先于过时拼写，正常拼写数量不足时才会用过时拼写补足数量。
+显示的搜索结果按汉字 Unicode 码位排序，有数量上限，可在插件配置中更改。超出上限时将随机抽取指定数量的结果显示，但正常拼写优先于过时拼写，正常拼写数量不足时才会用过时拼写补足数量。
 
 示例：
 
 `xdi8-grep H.*H`
 
 ```
-示 HuTH
+昝 H2H
+曾 H3H（zēng）
+熷 H3xH
+氏 H6H
+失 HEH
+兹 HVH（cí 只用于“龟（qiū）兹”）
 时 HoH
-猪 HAH
-髭 HuLjH
-洓 HueEH
-絷 HuauH
-矰 H37H
-夃 Hu3H
-屒 H8pH
-𠂔 HYH
+执 HuaH
+棘 Hue2H
+朿 HueH
 …共 26 条结果。
 ```
 
 `xdi8-grep \c\g\v[^\CH]H`
 
 ```
-黯 Ni2bH
+衠 7iemH
+崈 Bi3wH
+廸 FiVzH
+髭 HuLjH
+幉 diepH
+晧 hiLbH
+廹 piYzH
+宨 tiLfH
 𫠊 xu2gH
 烠 yu6xH
-衠 7iemH
-勮 5iVlH
-宨 tiLfH
-嶚 liLwH
-攼 hi2rH（hàn）
-甼 ti84H
-幉 diepH
 …共 42 条结果。
 ```
 
@@ -156,7 +156,7 @@ wiY 4i6 wA 56</code>
 
 ```
 幈 ppi8p
-徊 VVfiV（旧拼写）
 璱 33b63（旧拼写）
+徊 VVfiV（旧拼写）
 共 3 条结果。
 ```

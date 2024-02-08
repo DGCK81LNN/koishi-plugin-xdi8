@@ -34,7 +34,7 @@ function samples<T>(items: T[], count: number) {
 }
 
 export function apply(ctx: Context, config: Config) {
-  const dict = data.dict
+  const dict = data.dict.slice(0).sort((a, b) => (a.x < b.x ? -1 : a.x > b.x ? 1 : 0))
 
   ctx
     .command("xdi8-grep <pattern:string>", {
