@@ -28,7 +28,8 @@ function samples<T>(items: T[], count: number) {
   do {
     const pos = ~~(Math.random() * sequence.length)
     indices.push(sequence[pos] ?? pos)
-    sequence[pos] = sequence.pop() ?? sequence.length
+    const last = sequence.pop()
+    if (pos < sequence.length) sequence[pos] = last ?? sequence.length
   } while (indices.length < count)
   indices.sort((a, b) => a - b)
 
