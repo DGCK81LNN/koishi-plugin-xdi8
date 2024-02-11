@@ -1,6 +1,8 @@
 import { Context, Schema } from "koishi"
-import { data } from "xdi8-transcriber"
-import { ahoFixes } from "./utils"
+import { getHx } from "../transcriber-manager"
+import { ahoFixes } from "../utils"
+
+export const name = "xdi8-grep"
 
 export interface Config {
   maxResults: number
@@ -9,7 +11,7 @@ export interface Config {
 export const Config: Schema<Config> = Schema.object({
   maxResults: Schema.number()
     .default(10)
-    .description("xdi8-grep 结果的最大数量。超出时则随机从中抽取指定数量。"),
+    .description("结果的最大数量。超出时则随机从中抽取指定数量。"),
 })
 
 function samples<T>(items: T[], count: number) {
@@ -34,8 +36,6 @@ function samples<T>(items: T[], count: number) {
 }
 
 export function apply(ctx: Context, config: Config) {
-  const dict = data.dict.slice(0).sort((a, b) => (a.x < b.x ? -1 : a.x > b.x ? 1 : 0))
-
   ctx
     .command("xdi8-grep <pattern:string>", {
       checkArgCount: true,
@@ -66,7 +66,7 @@ export function apply(ctx: Context, config: Config) {
       })()
       if (!re) return session.text(".invalid-pattern")
 
-      let entries = dict.filter(
+      let entries = getHx().dict.filter(
         entry =>
           entry.x.match(re) &&
           !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h))

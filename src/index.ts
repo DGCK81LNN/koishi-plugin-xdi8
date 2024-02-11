@@ -1,151 +1,80 @@
-import { Context, Schema, Session, h } from "koishi"
-import {
-  Alternation,
-  HanziToXdi8Transcriber,
-  TranscribeResult,
-  Xdi8ToHanziTranscriber,
-} from "xdi8-transcriber"
-import { ahoFixes, stripTags } from "./utils"
-import * as pluginGrep from "./grep"
+import { Context, Schema } from "koishi"
+import * as pluginXdi8 from "./plugins/xdi8"
+import * as pluginXdi8Grep from "./plugins/xdi8-grep"
 
-export const name = "xdi8"
+export const name = "xdi8-index"
+
+export const usage = /*markdown*/`
+<style>
+@font-face {
+  font-family: XEGOEPUAall;
+  src: url(https://dgck81lnn.github.io/bootstrap-lnn/fonts/XEGOEPUAall.ttf);
+  font-display: block;
+}
+.koixdi8 {
+  font: 3em XEGOEPUAall;
+  color: #4737AC;
+}
+.koixdi8 .koixdi8-logo {
+  height: 1.25em;
+  vertical-align: text-bottom;
+}
+.koixdi8 .koixdi8-link.koixdi8-link {
+  color: inherit;
+  text-decoration-thickness: 2px;
+}
+.koixdi8 .koixdi8-koi {
+  color: #8324DD;
+}
+:root.dark .koixdi8 {
+  color: #AA99FF;
+}
+:root.dark .koixdi8 .koixdi8-koi {
+  color: #C079F2;
+}
+</style>
+
+<div class="koixdi8"><img class="koixdi8-logo" src="https://koishi.chat/logo.png"> <span class="koixdi8-koi"></span><a class="koixdi8-link" href="https://wiki.xdi8.top/wiki/希顶语" target="_blank" title="希顶（希顶语“灯”）"></a></div>
+
+欢迎使用本插件。请按需启用或禁用下列功能。
+`
+
+type Toggle<T> = T & { enabled: boolean }
+
+function schemaToggle<T>(
+  schema: Schema<T>,
+  description: string,
+  enableByDefault = false
+): Schema<Toggle<T>> {
+  return Schema.intersect([
+    Schema.object({
+      enabled: Schema.boolean().description("启用该功能。").default(enableByDefault),
+    }).description(description),
+    Schema.union([
+      Schema.object({
+        enabled: Schema.const(true).required(!enableByDefault),
+        ...schema.dict,
+      }),
+      Schema.object({
+        enabled: Schema.const(false).required(enableByDefault),
+      }),
+    ]),
+  ]) as Schema<Toggle<T>>
+}
 
 export interface Config {
-  footnotesInSeparateMessage: boolean
-  grep: pluginGrep.Config
+  xdi8: Toggle<pluginXdi8.Config>
+  xdi8Grep: Toggle<pluginXdi8Grep.Config>
 }
 
-export const Config: Schema<Config> = Schema.object({
-  footnotesInSeparateMessage: Schema.boolean()
-    .description("是否将结果正文与脚注分成两条消息发送。")
-    .default(true),
-  grep: pluginGrep.Config,
-})
-
-function supNum(n: number) {
-  return Array.from(String(0 | n), (d: `${number}`) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]).join("")
-}
-
-let hxTranscriber: HanziToXdi8Transcriber
-let xhTranscriber: Xdi8ToHanziTranscriber
+export const Config = Schema.object({
+  xdi8: schemaToggle(pluginXdi8.Config, "xdi8：汉希互转", true),
+  xdi8Grep: schemaToggle(pluginXdi8Grep.Config, "xdi8-grep：从字表正则搜索希顶词"),
+}) as Schema<Config>
 
 export function apply(ctx: Context, config: Config) {
-  function stringifyResult<T extends "h" | "x">(
-    session: Session,
-    result: TranscribeResult,
-    sourceType: T,
-    { all = false }
-  ) {
-    const single = result.length === 1 && Array.isArray(result[0])
-
-    const showLegacy = single || all
-    const showExceptional = single || all || sourceType === "h"
-    result = result.flatMap(seg => {
-      if (Array.isArray(seg)) {
-        if (!all) {
-          seg = seg.filter(alt => {
-            if (!showLegacy && alt.legacy) return false
-            if (!showExceptional && alt.exceptional) return false
-            // aho fix when `all` flag is set: only keep preferred forms
-            if (
-              sourceType === "x" &&
-              alt.content.some(
-                seg => Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
-              )
-            )
-              return false
-            return true
-          })
-        } else if (
-          sourceType === "x" &&
-          seg.some(alt => alt.content.some(seg => Object.hasOwn(ahoFixes, seg.x)))
-        ) {
-          // aho fix when `all` flag is not set: move non-preferred forms to bottom
-          const good: Alternation[] = []
-          const bad: Alternation[] = []
-          for (const alt of seg) {
-            const isBad = alt.content.some(
-              seg => Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
-            )
-            ;(isBad ? bad : good).push(alt)
-          }
-          seg = good.concat(bad)
-        }
-        if (seg.length === 1) return seg[0].content
-      }
-      return [seg]
-    })
-
-    const alts: (Alternation[] & { $: string })[] = []
-    const text = result
-      .map(seg => {
-        if (typeof seg === "string") return seg
-        if (Array.isArray(seg)) {
-          const j = JSON.stringify(seg)
-          let index = alts.findIndex(s => s.$ === j)
-          if (index === -1) {
-            index = alts.length
-            alts.push(Object.assign(seg, { $: j }))
-          }
-          return seg[0].content.map(seg => seg.v).join("") + supNum(index + 1)
-        }
-        return seg.v
-      })
-      .join("")
-
-    const footnotes = alts.map(seg => {
-      const source = seg[0].content.map(seg => seg[sourceType]).join("")
-      const alts = seg.map(alt => {
-        let line = alt.content.map(seg => seg.v).join("")
-        if (alt.note)
-          line += session.text("general.paren", [alt.note.replace(/\n/g, "；")])
-        return line
-      })
-      return `${source}:\n${alts.join("\n")}`
-    })
-
-    if (single && footnotes.length === 1) return h.escape(footnotes[0])
-
-    return [text, footnotes.map((fn, i) => `[${i + 1}] ${fn}`).join("\n")]
-      .map(s => h.escape(s))
-      .filter(Boolean)
-      .join(config.footnotesInSeparateMessage ? "<message />" : "\n")
-  }
-
-  function getResultScore(result: TranscribeResult) {
-    if (!result) return 0
-    return result.reduce(
-      (score, seg) =>
-        score + (Array.isArray(seg) ? seg[0].content.length : +(typeof seg === "object")),
-      0
-    )
-  }
-
-  const cmdXdi8 = ctx.command("xdi8 <text:text>", {
-    checkArgCount: true,
-    checkUnknown: true,
-    showWarning: true,
-  })
-  cmdXdi8.option("all", "-a").action(({ options, session }, text) => {
-    text = stripTags(text).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
-
-    hxTranscriber ||= new HanziToXdi8Transcriber()
-    xhTranscriber ||= new Xdi8ToHanziTranscriber()
-
-    const hxResult = hxTranscriber.transcribe(text, { ziSeparator: " " })
-    const hxScore = getResultScore(hxResult)
-    const xhResult = xhTranscriber.transcribe(text, { alphaFilter: null })
-    const xhScore = getResultScore(xhResult)
-
-    if (!hxScore && !xhScore) return session.text(".no-result")
-
-    if (hxScore > xhScore) return stringifyResult(session, hxResult, "h", options)
-
-    const xhResultCompact = xhResult.filter(seg => seg !== " ")
-    return stringifyResult(session, xhResultCompact, "x", options)
-  })
-
-  ctx.plugin(pluginGrep, config.grep)
-
   ctx.i18n.define("zh", require("./locales/zh"))
+
+  if (config.xdi8.enabled) ctx.plugin(pluginXdi8, config.xdi8)
+  if (config.xdi8Grep.enabled) ctx.plugin(pluginXdi8Grep, config.xdi8Grep)
 }
