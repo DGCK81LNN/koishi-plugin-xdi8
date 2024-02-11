@@ -25,3 +25,16 @@ commands:
       no-result: 未找到符合条件的希顶词。
       invalid-pattern: 无效的正则表达式。
       result-footer: 共 {0} 条结果。
+  xegoe:
+    description: 希顶字母图片
+    usage: |-
+      用希顶字体渲染希顶聊天字母或希顶字母 PUA 编码，或给汉字注音。
+      启用“-x”选项时，将关闭给汉字注音的功能，转而写出输入中希顶词对应的汉字。此模式下，希顶词之间需要用空格隔开。
+    arguments:
+      text: 文本
+    options:
+      all: 处理汉字时，显示所有可能的转写结果。
+      x2h: 希顶转汉字模式
+    messages:
+      no-shidinn-letter-or-hanzi: 未发现希顶字母或可注音的汉字。
+      no-shidinn-word: 未发现正确的希顶词（注意：连写无效）。

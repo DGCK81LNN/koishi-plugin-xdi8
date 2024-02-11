@@ -100,7 +100,40 @@ wiY 4i6 wA 56</code>
 
 ## 附加功能
 
-### grep
+### xegoe
+
+  > 指令：`xegoe <text...>`
+  >
+  > 希顶字母图片
+  >
+  > 用希顶字体渲染希顶聊天字母或希顶字母 PUA 编码，或给汉字注音。
+  >
+  > 启用“`-x`”选项时，将关闭给汉字注音的功能，转而写出输入中希顶词对应的汉字。此模式下，希顶词之间需要用空格隔开。
+  >
+  > 可用的选项有：
+  >
+  >   * `-a, --all` 处理汉字时，显示所有可能的转写结果。
+  >   * `-x, --x2h` 希顶转汉字模式
+
+用 Xegoe UI 字体（希顶字母 PUA 编码版）将希顶语文本渲染成图片（或给汉字注音）。
+
+希顶字母使用聊天字母或 PUA 编码表示皆可。
+
+示例：
+
+`xegoe ^Vnu8 AHL`
+
+<pre><img src="images/xegoe_hello.png"></pre>
+
+`xegoe 灯纟火社区`
+
+<pre><img src="images/xegoe_shidinn_aho_community.png"></pre>
+
+`xegoe -xa la da ta`
+
+<pre><img src="images/xegoe_la_da_ta.png"></pre>
+
+### xdi8-grep
 
   > 指令：`xdi8-grep <pattern>`
   >
