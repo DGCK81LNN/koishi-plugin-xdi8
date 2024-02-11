@@ -2,6 +2,7 @@ import { Context, Schema } from "koishi"
 import * as pluginXdi8 from "./plugins/xdi8"
 import * as pluginXegoe from "./plugins/xegoe"
 import * as pluginXdi8Grep from "./plugins/xdi8-grep"
+import * as pluginLnnzhyz from "./plugins/lnnzhyz"
 
 export const name = "xdi8-index"
 export const inject = {
@@ -73,6 +74,7 @@ export interface Config {
   xdi8: Toggle<pluginXdi8.Config>
   xegoe: Toggle<pluginXegoe.Config>
   xdi8Grep: Toggle<pluginXdi8Grep.Config>
+  lnnzhyz: Toggle<pluginLnnzhyz.Config>
 }
 
 export const Config = Schema.object({
@@ -84,6 +86,12 @@ export const Config = Schema.object({
     "（需要加载 component:html 服务）"
   ),
   xdi8Grep: schemaToggle(pluginXdi8Grep.Config, "xdi8-grep：从字表正则搜索希顶词"),
+  lnnzhyz: schemaToggle(
+    pluginLnnzhyz.Config,
+    "lnnzhyz：渲染 LNN 中华语字图片",
+    false,
+    "（需要加载 component:html 服务）"
+  ),
 }) as Schema<Config>
 
 export function apply(ctx: Context, config: Config) {
@@ -92,4 +100,5 @@ export function apply(ctx: Context, config: Config) {
   if (config.xdi8.enabled) ctx.plugin(pluginXdi8, config.xdi8)
   if (config.xegoe.enabled) ctx.plugin(pluginXegoe, config.xegoe)
   if (config.xdi8Grep.enabled) ctx.plugin(pluginXdi8Grep, config.xdi8Grep)
+  if (config.lnnzhyz.enabled) ctx.plugin(pluginLnnzhyz, config.lnnzhyz)
 }

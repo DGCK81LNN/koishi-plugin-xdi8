@@ -193,3 +193,49 @@ wiY 4i6 wA 56</code>
 徊 VVfiV（旧拼写）
 共 3 条结果。
 ```
+
+### lnnzhyz
+
+  > 指令：`lnnzhyz <text...>`
+  >
+  > 绘制 [LNN 中华语字](https://www.mywiki.cn/dgck81lnn/index.php/LNN_中华语字)（支持[希顶语方案](https://www.mywiki.cn/dgck81lnn/index.php/希顶语_LNN_中华语字方案)）
+  >
+  > “输入类型”可设为以下值：
+  >
+  >   * `xdi8` 或 `shidinn` — 希顶语（聊天字母）
+  >   * `mandarin` — 普通话（「半魔改拼音」）
+  >   * `notation` — LNN 中华语字通用序列化格式
+  >
+  > 也可使用类型名称的首字母作为短选项使用：`-x, -s, -m, -n`
+  >
+  > 可用的选项有：
+  >
+  >   * `-c, --compile`  仅将输入文本转换为通用序列化格式
+  >   * `--type <type>`  输入类型
+
+示例：
+
+`lnnzhyz ^xdi8_aho!`
+
+<pre><img src="images/lnnzhyz_shidinn_hello.png"></pre>
+
+`lnnzhyz -m ni3_hau3, ^L_^N_^N ^zhung1_hua2_y3_z4!`
+
+<pre><img src="images/lnnzhyz_mandarin_hello_lnnzhyz.png"></pre>
+
+<code>lnnzhyz -c\
+xdi8\
+4oquV 4o_quV\
+y353 y3_53</code>
+
+    x+dieng
+    w+oo+quei woo_quei
+    yj+en+ngwen yjen_ngwen
+
+`lnnzhyz -cm xi1_ding3_deng1`
+
+    xi_ieng~d_deng
+
+`lnnzhyz -n $(lnnzhyz -cm xi1_ding3) $(lnnzhyz -c xdi8)`
+
+<pre><img src="images/lnnzhyz_shidinndeng.png"></pre>
