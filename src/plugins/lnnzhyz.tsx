@@ -5,6 +5,7 @@ import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
 import { stripTags, tryRestoreRawText } from "../utils"
 
 export const name = "lnnzhyz"
+export const inject = ["component:html"]
 
 export interface Config {
   fontSize: number
