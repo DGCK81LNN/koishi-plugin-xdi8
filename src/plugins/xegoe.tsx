@@ -1,7 +1,7 @@
 import { Context, Schema, h } from "koishi"
 import { chatToXdPUA, type Alternation, type TranscribeResult } from "xdi8-transcriber"
 import { getHx, getXh } from "../transcriber-manager"
-import { stripTags, tryRestoreRawText } from "../utils"
+import { tryRestoreRawText } from "../utils"
 
 export const name = "xegoe"
 export const inject = ["component:html"]
@@ -113,7 +113,7 @@ export function apply(ctx: Context, config: Config) {
     .option("all", "-a")
     .option("x2h", "-x")
     .action(({ options: { all, x2h }, session, source }, text) => {
-      if (source) text = stripTags(tryRestoreRawText(text, source) || text)
+      if (source) text = tryRestoreRawText(text, source, true)
 
       const result = (x2h ? xhTranscribe : hxTranscribe)(text)
       const visual = formatResult(result, x2h ? "x" : "h", { all })

@@ -1,8 +1,8 @@
-import { Context, Schema, h } from "koishi"
-import type {} from "@koishijs/plugin-help"
 import { compileMandarin, compileShidinn, draw } from "@dgck81lnn/lnnzhyz2svg"
 import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
-import { stripTags, tryRestoreRawText } from "../utils"
+import type { } from "@koishijs/plugin-help"
+import { Context, Schema, h } from "koishi"
+import { tryRestoreRawText } from "../utils"
 
 export const name = "lnnzhyz"
 export const inject = ["component:html"]
@@ -47,7 +47,7 @@ export function apply(ctx: Context, config: Config) {
   cmd.option("type", "-n", { value: "notation", hidden: true })
   cmd.action(
     async ({ options: { compile: compileOnly, type }, session, source }, text) => {
-      if (source) text = stripTags(tryRestoreRawText(text, source) || text)
+      if (source) text = tryRestoreRawText(text, source, true)
 
       if (compileOnly && type === "notation")
         return session.text(".cannot-compile-notation")

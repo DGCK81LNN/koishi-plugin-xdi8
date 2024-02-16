@@ -1,7 +1,7 @@
 import { Context, Schema, Session, h } from "koishi"
 import type { Alternation, TranscribeResult } from "xdi8-transcriber"
 import { getHx, getXh } from "../transcriber-manager"
-import { ahoFixes, stripTags, tryRestoreRawText } from "../utils"
+import { ahoFixes, tryRestoreRawText } from "../utils"
 
 export const name = "xdi8"
 
@@ -117,7 +117,7 @@ export function apply(ctx: Context, config: Config) {
     showWarning: true,
   })
   cmdXdi8.option("all", "-a").action(({ options, session, source }, text) => {
-    if (source) text = stripTags(tryRestoreRawText(text, source) || text)
+    if (source) text = tryRestoreRawText(text, source, true)
     text = text.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
     const hxResult = getHx().transcribe(text, { ziSeparator: " " })
