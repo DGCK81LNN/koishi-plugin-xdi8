@@ -10,7 +10,7 @@ export interface Config {
 
 export const Config: Schema<Config> = Schema.object({
   maxResults: Schema.number()
-    .default(10)
+    .default(15)
     .description("结果的最大数量。超出时则随机从中抽取指定数量。"),
 })
 
