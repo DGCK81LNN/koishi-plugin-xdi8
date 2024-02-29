@@ -13,7 +13,7 @@ export const usage = /*markdown*/ `
 <style>
 @font-face {
   font-family: XEGOEPUAall;
-  src: url(https://dgck81lnn.github.io/bootstrap-lnn/fonts/XEGOEPUAall.ttf);
+  src: url(https://dgck81lnn.github.io/bootstrap-lnn/fonts/XEGOEPUAall.woff2);
   font-display: block;
 }
 .koixdi8 {
