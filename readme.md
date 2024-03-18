@@ -72,7 +72,7 @@ pio（“發”的简化字 fā）
 jbia（“髪”的简化字 fà）
 ```
 
-`xdi8 tof H6H huT vnuV nYH`
+`xdi8 tof H6H huT vnuV lYH`
 
 ```
 施氏食狮史
