@@ -26,45 +26,52 @@ export function apply(ctx: Context, config: Config) {
     sourceType: T,
     { all = false }
   ) {
-    const single = result.length === 1 && Array.isArray(result[0])
-
-    const showLegacy = single || all
-    const showExceptional = single || all || sourceType === "h"
-    result = result.flatMap(seg => {
-      if (Array.isArray(seg)) {
-        if (!all) {
-          seg = seg.filter(alt => {
-            if (!showLegacy && alt.legacy) return false
-            if (!showExceptional && alt.exceptional) return false
-            // aho fix when `all` flag is set: only keep preferred forms
-            if (
-              sourceType === "x" &&
-              alt.content.some(
+    const showLegacy = result.length === 1 || all
+    const showExceptional = result.length === 1 || all || sourceType === "h"
+    result = result
+      .flatMap(seg => {
+        if (Array.isArray(seg)) {
+          if (!all) {
+            seg = seg.filter(alt => {
+              if (!showLegacy && alt.legacy) return false
+              if (!showExceptional && alt.exceptional) return false
+              // aho fix when `all` flag is set: only keep preferred forms
+              if (
+                sourceType === "x" &&
+                alt.content.some(
+                  seg =>
+                    Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
+                )
+              )
+                return false
+              return true
+            })
+          } else if (
+            sourceType === "x" &&
+            seg.some(alt => alt.content.some(seg => Object.hasOwn(ahoFixes, seg.x)))
+          ) {
+            // aho fix when `all` flag is not set: move non-preferred forms to bottom
+            const good: Alternation[] = []
+            const bad: Alternation[] = []
+            for (const alt of seg) {
+              const isBad = alt.content.some(
                 seg => Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
               )
-            )
-              return false
-            return true
-          })
-        } else if (
-          sourceType === "x" &&
-          seg.some(alt => alt.content.some(seg => Object.hasOwn(ahoFixes, seg.x)))
-        ) {
-          // aho fix when `all` flag is not set: move non-preferred forms to bottom
-          const good: Alternation[] = []
-          const bad: Alternation[] = []
-          for (const alt of seg) {
-            const isBad = alt.content.some(
-              seg => Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
-            )
-            ;(isBad ? bad : good).push(alt)
+              ;(isBad ? bad : good).push(alt)
+            }
+            seg = good.concat(bad)
           }
-          seg = good.concat(bad)
+          if (seg.length === 1) return seg[0].content
         }
-        if (seg.length === 1) return seg[0].content
-      }
-      return [seg]
-    })
+        return [seg]
+      })
+      .map(seg => {
+        if (!Array.isArray(seg) && typeof seg === "object" && seg.legacy)
+          return [{ content: [seg], note: "旧拼写", exceptional: true, legacy: true }]
+        return seg
+      })
+
+    const single = result.length === 1 && Array.isArray(result[0])
 
     const alts: (Alternation[] & { $: string })[] = []
     const text = result
