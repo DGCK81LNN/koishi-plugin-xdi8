@@ -1,6 +1,6 @@
 import { compileMandarin, compileShidinn, draw } from "@dgck81lnn/lnnzhyz2svg"
 import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
-import type { } from "@koishijs/plugin-help"
+import type {} from "@koishijs/plugin-help"
 import { Context, Schema, h } from "koishi"
 import { tryRestoreRawText } from "../utils"
 

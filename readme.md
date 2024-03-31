@@ -4,9 +4,11 @@
 
 [希顶语](https://wiki.xdi8.top/wiki/希顶语)与汉字互转
 
+本插件提供 [`xdi8` 服务](#服务-api)。
+
 基于本人维护的 npm 包 [xdi8-transcriber](https://github.com/DGCK81LNN/xdi8-transcriber)
 
-## 用法
+## `xdi8` 指令
 
   > 指令：`xdi8 <text...>`
   >
@@ -239,3 +241,32 @@ y353 y3_53</code>
 `lnnzhyz -n $(lnnzhyz -cm xi1_ding3) $(lnnzhyz -c xdi8)`
 
 <pre><img src="images/lnnzhyz_shidinndeng.png"></pre>
+
+## 服务 API
+
+```ts
+declare module "koishi" {
+  interface Context {
+    xdi8: Xdi8
+  }
+}
+
+export class Xdi8 {
+  /**
+   * 获取或设置字表数据。
+   *
+   * 初始值为当前版本 xdi8-transcriber 所导出的 `data`。
+   *
+   * 修改此属性后再获取转写器，将重新构造新的转写器实例。
+   */
+  data: Data
+
+  /** 汉字转希顶转写器实例。 */
+  readonly hanziToXdi8Transcriber: HanziToAlphaTranscriber
+
+  /** 希顶转汉字转写器实例。 */
+  readonly xdi8ToHanziTranscriber: AlphaToHanziTranscriber
+}
+```
+
+转写器对象的具体用法参见 [xdi8-transcriber](https://github.com/DGCK81LNN/xdi8-transcriber) 的文档。

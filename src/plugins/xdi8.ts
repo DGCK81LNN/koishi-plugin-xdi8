@@ -1,9 +1,10 @@
 import { Context, Schema, Session, h } from "koishi"
 import type { Alternation, TranscribeResult } from "xdi8-transcriber"
-import { getHx, getXh } from "../transcriber-manager"
+import type {} from "../service"
 import { ahoFixes, tryRestoreRawText } from "../utils"
 
 export const name = "xdi8"
+export const inject = ["xdi8"]
 
 export interface Config {
   footnotesInSeparateMessage: boolean
@@ -127,9 +128,13 @@ export function apply(ctx: Context, config: Config) {
     if (source) text = tryRestoreRawText(text, source, true)
     text = text.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
-    const hxResult = getHx().transcribe(text, { ziSeparator: " " })
+    const hxResult = ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, {
+      ziSeparator: " ",
+    })
     const hxScore = getResultScore(hxResult)
-    const xhResult = getXh().transcribe(text, { alphaFilter: null })
+    const xhResult = ctx.xdi8.xdi8ToHanziTranscriber.transcribe(text, {
+      alphaFilter: null,
+    })
     const xhScore = getResultScore(xhResult)
 
     if (!hxScore && !xhScore) return session.text(".no-result")

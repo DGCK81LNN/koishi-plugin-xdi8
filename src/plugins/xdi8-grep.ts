@@ -1,8 +1,9 @@
 import { Context, Schema } from "koishi"
-import { getHx } from "../transcriber-manager"
+import type {} from "../service"
 import { ahoFixes } from "../utils"
 
 export const name = "xdi8-grep"
+export const inject = ["xdi8"]
 
 export interface Config {
   maxResults: number
@@ -67,7 +68,7 @@ export function apply(ctx: Context, config: Config) {
       })()
       if (!re) return session.text(".invalid-pattern")
 
-      let entries = getHx().dict.filter(
+      let entries = ctx.xdi8.hanziToXdi8Transcriber.dict.filter(
         entry =>
           entry.x.match(re) &&
           !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h))

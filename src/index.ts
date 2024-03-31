@@ -1,8 +1,11 @@
 import { Context, Schema } from "koishi"
+import Xdi8 from "./service"
 import * as pluginXdi8 from "./plugins/xdi8"
 import * as pluginXegoe from "./plugins/xegoe"
 import * as pluginXdi8Grep from "./plugins/xdi8-grep"
 import * as pluginLnnzhyz from "./plugins/lnnzhyz"
+
+export { Xdi8 }
 
 export const name = "xdi8-index"
 export const inject = {
@@ -97,6 +100,7 @@ export const Config = Schema.object({
 export function apply(ctx: Context, config: Config) {
   ctx.i18n.define("zh", require("./locales/zh"))
 
+  ctx.plugin(Xdi8)
   if (config.xdi8.enabled) ctx.plugin(pluginXdi8, config.xdi8)
   if (config.xegoe.enabled) ctx.plugin(pluginXegoe, config.xegoe)
   if (config.xdi8Grep.enabled) ctx.plugin(pluginXdi8Grep, config.xdi8Grep)

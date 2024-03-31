@@ -1,10 +1,16 @@
 import { Context, Schema, h } from "koishi"
-import { chatToXdPUA, type Alternation, type TranscribeResult } from "xdi8-transcriber"
-import { getHx, getXh } from "../transcriber-manager"
+import {
+  chatToXdPUA,
+  type AlphaToHanziTranscriber,
+  type Alternation,
+  type HanziToAlphaTranscriber,
+  type TranscribeResult,
+} from "xdi8-transcriber"
+import type {} from "../service"
 import { tryRestoreRawText } from "../utils"
 
 export const name = "xegoe"
-export const inject = ["component:html"]
+export const inject = ["xdi8", "component:html"]
 
 export interface Config {
   src: string
@@ -29,12 +35,18 @@ export const Config: Schema<Config> = Schema.object({
   padding: Schema.string().description("文本区域的边距").default("0.25em"),
 })
 
-function hxTranscribe(text: string) {
-  return getHx().transcribe(text, { ziSeparator: "" })
+function hxTranscribe(
+  ctx: { xdi8: { hanziToXdi8Transcriber: HanziToAlphaTranscriber } },
+  text: string
+) {
+  return ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, { ziSeparator: "" })
 }
 
-function xhTranscribe(text: string) {
-  return getXh().transcribe(text, { ziSeparator: " " })
+function xhTranscribe(
+  ctx: { xdi8: { xdi8ToHanziTranscriber: AlphaToHanziTranscriber } },
+  text: string
+) {
+  return ctx.xdi8.xdi8ToHanziTranscriber.transcribe(text, { ziSeparator: " " })
 }
 
 function ruby(chars: { h: string; x: string }[], className?: string) {
@@ -115,7 +127,7 @@ export function apply(ctx: Context, config: Config) {
     .action(({ options: { all, x2h }, session, source }, text) => {
       if (source) text = tryRestoreRawText(text, source, true)
 
-      const result = (x2h ? xhTranscribe : hxTranscribe)(text)
+      const result = (x2h ? xhTranscribe : hxTranscribe)(ctx, text)
       const visual = formatResult(result, x2h ? "x" : "h", { all })
       if (!visual)
         return session.text(x2h ? ".no-shidinn-word" : ".no-shidinn-letter-or-hanzi")
