@@ -7,7 +7,7 @@ import {
   type TranscribeResult,
 } from "xdi8-transcriber"
 import type {} from "../service"
-import { tryRestoreRawText } from "../utils"
+import { stripTags } from "../utils"
 
 export const name = "xegoe"
 export const inject = ["xdi8", "component:html"]
@@ -117,15 +117,15 @@ function formatResult<T extends "h" | "x">(
 
 export function apply(ctx: Context, config: Config) {
   ctx
-    .command("xegoe <text:text>", {
+    .command("xegoe <text:el>", {
       checkArgCount: true,
       checkUnknown: true,
       showWarning: true,
     })
     .option("all", "-a")
     .option("x2h", "-x")
-    .action(({ options: { all, x2h }, session, source }, text) => {
-      if (source) text = tryRestoreRawText(text, source, true)
+    .action(({ options: { all, x2h }, session }, els) => {
+      const text = stripTags(els)
 
       const result = (x2h ? xhTranscribe : hxTranscribe)(ctx, text)
       const visual = formatResult(result, x2h ? "x" : "h", { all })

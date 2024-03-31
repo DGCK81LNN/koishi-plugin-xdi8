@@ -13,30 +13,10 @@ export const ahoFixes: Record<string, string[]> = {
   aho: ["纟火", "糹火"],
 }
 
-/**
- * Workaround for koishi treating message element XML as part of the text input
- * without escaping literal special characters. This function tries to get the
- * raw text input from `argv.source`.
- */
-export function tryRestoreRawText(text: string, source: string, strip = false) {
-  const unescapedSource = h.unescape(source)
-  const start = unescapedSource.lastIndexOf(text)
-  if (start === -1) return null
-  const unescapedBefore = unescapedSource.slice(0, start)
-  for (let i = 1; i < source.length; i++) {
-    const head = h.unescape(source.slice(0, i))
-    if (head === unescapedBefore) {
-      const raw = source.slice(i)
-      if (strip) return stripTags(raw)
-    }
-  }
-  return null
-}
-
-export function stripTags(text: string) {
+export function stripTags(els: h[]) {
   return h.unescape(
     h
-      .transform(text.replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
+      .transform(els.join("").replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
         // use noncharacter codepoints to mark specific anchors
         // object replacement
         img: "\ufdd0",

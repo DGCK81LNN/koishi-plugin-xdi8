@@ -2,7 +2,7 @@ import { compileMandarin, compileShidinn, draw } from "@dgck81lnn/lnnzhyz2svg"
 import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
 import type {} from "@koishijs/plugin-help"
 import { Context, Schema, h } from "koishi"
-import { tryRestoreRawText } from "../utils"
+import { stripTags } from "../utils"
 
 export const name = "lnnzhyz"
 export const inject = ["component:html"]
@@ -25,7 +25,7 @@ export const Config: Schema<Config> = Schema.object({
 
 export function apply(ctx: Context, config: Config) {
   const cmd = ctx
-    .command("lnnzhyz <text:text>", {
+    .command("lnnzhyz <text:el>", {
       checkArgCount: true,
       checkUnknown: true,
       showWarning: true,
@@ -45,80 +45,78 @@ export function apply(ctx: Context, config: Config) {
   cmd.option("type", "-s", { value: "shidinn", hidden: true })
   cmd.option("type", "-m", { value: "mandarin", hidden: true })
   cmd.option("type", "-n", { value: "notation", hidden: true })
-  cmd.action(
-    async ({ options: { compile: compileOnly, type }, session, source }, text) => {
-      if (source) text = tryRestoreRawText(text, source, true)
+  cmd.action(async ({ options: { compile: compileOnly, type }, session }, els) => {
+    const text = stripTags(els)
 
-      if (compileOnly && type === "notation")
-        return session.text(".cannot-compile-notation")
+    if (compileOnly && type === "notation")
+      return session.text(".cannot-compile-notation")
 
-      let someOk = false
-      const compileFn = {
-        shidinn: compileShidinn,
-        mandarin: compileMandarin,
-        notation: deserializeText,
-      }[type]
-      const phraseRe =
-        type === "notation"
-          ? /\^?[~\dA-Z]+(?:[+ _-]\^?[~\dA-Z]+)*/gi
-          : /\^?[\dA-Z]+(?:[ _-]\^?[\dA-Z]+)*/gi
+    let someOk = false
+    const compileFn = {
+      shidinn: compileShidinn,
+      mandarin: compileMandarin,
+      notation: deserializeText,
+    }[type]
+    const phraseRe =
+      type === "notation"
+        ? /\^?[~\dA-Z]+(?:[+ _-]\^?[~\dA-Z]+)*/gi
+        : /\^?[\dA-Z]+(?:[ _-]\^?[\dA-Z]+)*/gi
 
-      const result = text
-        .replace(/\ufdd0/g, "\ufffd")
-        .replace(/</g, "\ufdd0")
-        .replace(phraseRe, phrase => {
-          const words = phrase.split(" ")
-          const results: string[] = []
-          outer: do {
-            for (let i = words.length; i > 0; i--) {
-              try {
-                const clause = compileFn(words.slice(0, i).join(" "))
-                results.push(
-                  compileOnly
-                    ? serializeText(clause)
-                    : `<img src="data:image/svg+xml,${h.escape(draw(clause), true)}" />`
-                )
-                someOk = true
-                words.splice(0, i)
-                continue outer
-              } catch {}
-            }
-            const word = words.shift()
-            results.push(compileOnly ? word : `<span style="color:red">${word}</span>`)
-          } while (words.length)
-          return results.join(" ")
-        })
-        .replace(/\ufdd0/g, "<")
+    const result = text
+      .replace(/\ufdd0/g, "\ufffd")
+      .replace(/</g, "\ufdd0")
+      .replace(phraseRe, phrase => {
+        const words = phrase.split(" ")
+        const results: string[] = []
+        outer: do {
+          for (let i = words.length; i > 0; i--) {
+            try {
+              const clause = compileFn(words.slice(0, i).join(" "))
+              results.push(
+                compileOnly
+                  ? serializeText(clause)
+                  : `<img src="data:image/svg+xml,${h.escape(draw(clause), true)}" />`
+              )
+              someOk = true
+              words.splice(0, i)
+              continue outer
+            } catch {}
+          }
+          const word = words.shift()
+          results.push(compileOnly ? word : `<span style="color:red">${word}</span>`)
+        } while (words.length)
+        return results.join(" ")
+      })
+      .replace(/\ufdd0/g, "<")
 
-      if (!someOk) return session.text(".no-valid-phrase")
-      if (compileOnly) return result
+    if (!someOk) return session.text(".no-valid-phrase")
+    if (compileOnly) return result
 
-      return (
-        <html>
-          <style>{
-            /*css*/ `
+    return (
+      <html>
+        <style>{
+          /*css*/ `
             img {
               height: 1.1875em;
               vertical-align: text-bottom;
             }`
-          }</style>
-          <div
-            style={{
-              width: "auto",
-              height: "auto",
-              maxWidth: config.width,
-              lineHeight: "1",
-              padding: config.padding,
-              fontSize: `${config.fontSize}px`,
-              fontFamily: config.fontFamily,
-              whiteSpace: "pre-wrap",
-              overflowWrap: "break-word",
-            }}
-          >
-            {h.parse(result.replace(/\n/g, "<br />"))}
-          </div>
-        </html>
-      )
-    }
-  )
+        }</style>
+        <div
+          style={{
+            width: "auto",
+            height: "auto",
+            maxWidth: config.width,
+            lineHeight: "1",
+            padding: config.padding,
+            fontSize: `${config.fontSize}px`,
+            fontFamily: config.fontFamily,
+            whiteSpace: "pre-wrap",
+            overflowWrap: "break-word",
+          }}
+        >
+          {h.parse(result.replace(/\n/g, "<br />"))}
+        </div>
+      </html>
+    )
+  })
 }
