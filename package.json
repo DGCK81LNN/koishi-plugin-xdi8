@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-xdi8",
   "description": "Shidinn tools for Koishi",
-  "version": "0.4.12",
+  "version": "1.0.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
