@@ -49,10 +49,14 @@ function xhTranscribe(
   return ctx.xdi8.xdi8ToHanziTranscriber.transcribe(text, { ziSeparator: " " })
 }
 
-function ruby(chars: { h: string; x: string }[], className?: string) {
-  const ruby = <ruby>{chars.flatMap(({ h, x }) => [h, <rt>{chatToXdPUA(x)}</rt>])}</ruby>
-  if (className) return <div class={className}>{ruby}</div>
-  return ruby
+function ruby(chars: { h: string; x: string; legacy?: boolean }[], className?: string) {
+  const ruby = chars.flatMap(({ h, x, legacy }) => (
+    <ruby class={[legacy && "char-legacy"]}>
+      {h}
+      <rt>{chatToXdPUA(x)}</rt>
+    </ruby>
+  ))
+  return <span class={className}>{ruby}</span>
 }
 
 function formatResult<T extends "h" | "x">(
@@ -100,7 +104,7 @@ function formatResult<T extends "h" | "x">(
         {seg[0].content.map(seg => seg[sourceType]).join("")}:
         <ul class="alternations">
           {seg.map(alt => (
-            <li class={`alternation ${alt.legacy ? "alternation-legacy" : ""}`}>
+            <li class="alternation">
               {ruby(alt.content)} <span class="note">{alt.note}</span>
             </li>
           ))}
@@ -162,8 +166,8 @@ export function apply(ctx: Context, config: Config) {
               margin: 0;
               padding-left: 0.5em;
             }
-            .alternation-legacy {
-              color: #777;
+            .char-legacy {
+              color: red;
             }
             .footnotes-only ruby {
               font-size: 1.333333em;
