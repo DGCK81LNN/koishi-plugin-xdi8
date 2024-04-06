@@ -158,41 +158,51 @@ wiY 4i6 wA 56</code>
 `xdi8-grep H.*H`
 
 ```
-昝 H2H
-曾 H3H（zēng）
-熷 H3xH
-氏 H6H
-失 HEH
 兹 HVH（cí 只用于“龟（qiū）兹”）
+呰 HuLoH（zǐ）
+失 HEH
+屒 H8pH
+市 HTH
 时 HoH
-执 HuaH
+昝 H2H
 棘 Hue2H
-朿 HueH
+氏 H6H
+洓 HueEH
+熷 H3xH
+甾 HuYH
+矰 H37H
+蚩 HuoH
+髭 HuLjH
 …共 26 条结果。
 ```
 
 `xdi8-grep \c\g\v[^\CH]H`
 
 ```
-衠 7iemH
-崈 Bi3wH
-廸 FiVzH
-髭 HuLjH
-幉 diepH
-晧 hiLbH
-廹 piYzH
 宨 tiLfH
+岹 7iLwH
+崈 Bi3wH
+帡 pi8pH
+幉 diepH
+攼 hi2rH（hàn）
+曜 ciLbH
+歂 DuYrH
+炟 diaxH
+煪 qu6xH
+疒 bi8tH
+赘 4iLxH
+鬯 DuT4H
+黯 Ni2bH
 𫠊 xu2gH
-烠 yu6xH
-…共 42 条结果。
+…共 45 条结果。
 ```
 
 `xdi8-grep (.).*\1.*\1`
 
 ```
 幈 ppi8p
-璱 33b63（旧拼写）
 徊 VVfiV（旧拼写）
+璱 33b63（旧拼写）
 共 3 条结果。
 ```
 
