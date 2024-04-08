@@ -29,7 +29,7 @@
     "locales": [
       "zh"
     ],
-    "services": {
+    "service": {
       "optional": [
         "component:html"
       ],
