@@ -1,7 +1,7 @@
 import { Context, Schema, Session, h } from "koishi"
 import type { Alternation, TranscribeResult } from "xdi8-transcriber"
 import type {} from "../service"
-import { ahoFixes, stripTags } from "../utils"
+import { doAhoFix, stripTags } from "../utils"
 
 export const name = "xdi8"
 export const inject = ["xdi8"]
@@ -33,33 +33,18 @@ export function apply(ctx: Context, config: Config) {
       .flatMap(seg => {
         if (Array.isArray(seg)) {
           if (!all) {
-            seg = seg.filter(alt => {
+            // aho fix when `all` flag is not set: only keep preferred forms
+            // note that at least one form must be preferred or this will produce an empty array, breaking things
+            if (sourceType === "x") seg = doAhoFix(seg)[0]
+
+            let newSeg = seg.filter(alt => {
               if (!showLegacy && alt.legacy) return false
               if (!showExceptional && alt.exceptional) return false
-              // aho fix when `all` flag is set: only keep preferred forms
-              if (
-                sourceType === "x" &&
-                alt.content.some(
-                  seg =>
-                    Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
-                )
-              )
-                return false
-              return true
             })
-          } else if (
-            sourceType === "x" &&
-            seg.some(alt => alt.content.some(seg => Object.hasOwn(ahoFixes, seg.x)))
-          ) {
-            // aho fix when `all` flag is not set: move non-preferred forms to bottom
-            const good: Alternation[] = []
-            const bad: Alternation[] = []
-            for (const alt of seg) {
-              const isBad = alt.content.some(
-                seg => Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
-              )
-              ;(isBad ? bad : good).push(alt)
-            }
+            if (newSeg.length) seg = newSeg
+          } else if (sourceType === "x") {
+            // aho fix when `all` flag is set: move non-preferred forms to bottom
+            const [good, bad] = doAhoFix(seg)
             seg = good.concat(bad)
           }
           if (seg.length === 1) return seg[0].content

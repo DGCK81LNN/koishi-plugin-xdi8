@@ -1,16 +1,25 @@
 import { h } from "koishi"
+import type { Alternation } from "xdi8-transcriber"
 
-/**
- * Dict of shidinn spellings and their preferred hanzi forms.
- *
- * Some entries have hanzi froms that include PUA characters which will not
- * display in plain-text environments. Thus, when characters in this dict are
- * transcribed to hanzi, only the preferred hanzi forms will be shown --
- * unless the `all` flag is set, in which case they are moved to the end of
- * the alternations array instead.
- */
 export const ahoFixes: Record<string, string[]> = {
   aho: ["纟火", "糹火"],
+}
+/**
+ * Some entries have hanzi froms that include PUA characters which will not display in
+ * plain-text environments. Thus, when such characters are transcribed to hanzi, we only
+ * show the "preferred" hanzi forms -- unless the `all` flag is set, in which case they
+ * are moved to the end of the alternation array instead.
+ */
+export function doAhoFix(seg: Alternation[]): [good: Alternation[], bad: Alternation[]] {
+  const good: Alternation[] = []
+  const bad: Alternation[] = []
+  for (const alt of seg) {
+    const isBad = alt.content.some(
+      seg => Object.hasOwn(ahoFixes, seg.x) && !ahoFixes[seg.x].includes(seg.v)
+    )
+    ;(isBad ? bad : good).push(alt)
+  }
+  return [good, bad]
 }
 
 export function stripTags(els: h[]) {
