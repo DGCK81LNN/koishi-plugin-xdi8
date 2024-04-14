@@ -82,7 +82,7 @@ export function apply(ctx: Context, config: Config) {
       const alts = seg.map(alt => {
         let line = alt.content.map(seg => seg.v).join("")
         if (alt.note)
-          line += session.text("general.paren", [alt.note.replace(/\n/g, "；")])
+          line += `（${alt.note.replace(/\n/g, "；")}）`
         return line
       })
       return `${source}:\n${alts.join("\n")}`

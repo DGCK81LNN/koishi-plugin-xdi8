@@ -91,7 +91,7 @@ export function apply(ctx: Context, config: Config) {
 
       const lines = entries.map(entry => {
         let line = `${entry.h} ${entry.x}`
-        if (entry.n) line += session.text("general.paren", [entry.n])
+        if (entry.n) line += `（${entry.n}）`
         return line
       })
       lines.push((more ? "…" : "") + session.text(".result-footer", [resultCount]))
