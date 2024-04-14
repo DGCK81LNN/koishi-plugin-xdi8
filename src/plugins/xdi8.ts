@@ -40,6 +40,7 @@ export function apply(ctx: Context, config: Config) {
             let newSeg = seg.filter(alt => {
               if (!showLegacy && alt.legacy) return false
               if (!showExceptional && alt.exceptional) return false
+              return true
             })
             if (newSeg.length) seg = newSeg
           } else if (sourceType === "x") {
