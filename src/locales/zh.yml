@@ -21,10 +21,13 @@ commands:
       \v — 韵母
       例如：“\c\g\v.H”可匹配形如 CGVRH 的希顶词。
       将转义字母大写以选择补集，如 \C 匹配非声母。
+    options:
+      legacy: 只搜索旧拼写
     messages:
       no-result: 未找到符合条件的希顶词。
       invalid-pattern: 无效的正则表达式。
       result-footer: 共 {0} 条结果。
+      result-footer-with-legacy: 共 {0} 条结果（{1} 条旧拼写）。
   xegoe:
     description: 希顶字母图片
     usage: |-

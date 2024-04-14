@@ -44,7 +44,8 @@ export function apply(ctx: Context, config: Config) {
       checkUnknown: true,
       showWarning: true,
     })
-    .action(({ session }, pattern) => {
+    .option("legacy", "-l", { fallback: false })
+    .action(({ session, options }, pattern) => {
       let inCharClass = false
       function charClass(chars: string) {
         return inCharClass ? chars : `[${chars}]`
@@ -73,16 +74,23 @@ export function apply(ctx: Context, config: Config) {
           entry.x.match(re) &&
           !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h))
       )
-      const resultCount = entries.length
-      if (!resultCount) return session.text(".no-result")
-      const more = resultCount > config.maxResults
+      if (!entries.length) return session.text(".no-result")
 
-      const regularEntries = []
-      const legacyEntries = []
+      let regularEntries = []
+      let legacyEntries = []
       for (const entry of entries) {
         if (entry.hh === "-" && entry.xh === "-") legacyEntries.push(entry)
-        else regularEntries.push(entry)
+        else if (!options.legacy) regularEntries.push(entry)
       }
+
+      if (options.legacy) {
+        if (!legacyEntries.length) return session.text(".no-result")
+        regularEntries = legacyEntries
+        legacyEntries = []
+      }
+
+      const resultCount = regularEntries.length + legacyEntries.length
+      const more = resultCount > config.maxResults
 
       entries = [
         ...samples(regularEntries, config.maxResults),
@@ -94,7 +102,15 @@ export function apply(ctx: Context, config: Config) {
         if (entry.n) line += `（${entry.n}）`
         return line
       })
-      lines.push((more ? "…" : "") + session.text(".result-footer", [resultCount]))
+      lines.push(
+        (more ? "…" : "") +
+          (legacyEntries.length
+            ? session.text(".result-footer-with-legacy", [
+                resultCount,
+                legacyEntries.length,
+              ])
+            : session.text(".result-footer", [resultCount]))
+      )
       return lines.join("\n")
     })
 }
