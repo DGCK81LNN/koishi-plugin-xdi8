@@ -12,7 +12,7 @@ export const inject = {
   optional: ["component:html"],
 }
 
-export const usage = /*markdown*/ `
+export const usage: string = /*markdown*/ `
 <style>
 @font-face {
   font-family: XEGOEPUAall;
@@ -42,7 +42,7 @@ export const usage = /*markdown*/ `
 }
 </style>
 
-<div class="koixdi8"><img class="koixdi8-logo" src="https://koishi.chat/logo.png"> <span class="koixdi8-koi"></span><a class="koixdi8-link" href="https://wiki.xdi8.top/wiki/希顶语" target="_blank" title="希顶（希顶语“灯”）"></a></div>
+<div class="koixdi8"><img class="koixdi8-logo" src="https://koishi.chat/logo.png"> <span class="koixdi8-koi"></span><a class="koixdi8-link" href="https://wiki.xdi8.top/wiki/希顶语" target="_blank" title="希顶语“灯”，音译为“希顶”"></a></div>
 
 欢迎使用本插件。请按需启用或禁用下列功能。
 `
@@ -86,14 +86,14 @@ export const Config = Schema.object({
     pluginXegoe.Config,
     "xegoe：渲染希顶字母图片",
     true,
-    "（需要加载 component:html 服务）"
+    "（需要加载 component:html 服务〔通常由 puppeteer 插件提供〕）"
   ),
   xdi8Grep: schemaToggle(pluginXdi8Grep.Config, "xdi8-grep：从字表正则搜索希顶词"),
   lnnzhyz: schemaToggle(
     pluginLnnzhyz.Config,
     "lnnzhyz：渲染 LNN 中华语字图片",
     false,
-    "（需要加载 component:html 服务）"
+    "（需要加载 component:html 服务〔通常由 puppeteer 插件提供〕）"
   ),
 }) as Schema<Config>
 
