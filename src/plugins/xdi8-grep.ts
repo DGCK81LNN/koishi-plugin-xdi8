@@ -1,6 +1,6 @@
 import { Context, Schema } from "koishi"
 import type {} from "../service"
-import { ahoFixes } from "../utils"
+import { ahoFixes, isSlash } from "../utils"
 
 export const name = "xdi8-grep"
 export const inject = ["xdi8"]
@@ -45,7 +45,8 @@ export function apply(ctx: Context, config: Config) {
       showWarning: true,
     })
     .option("legacy", "-l", { fallback: false })
-    .action(({ session, options }, pattern) => {
+    .action((argv, pattern) => {
+      const { session, options } = argv
       let inCharClass = false
       function charClass(chars: string) {
         return inCharClass ? chars : `[${chars}]`
@@ -62,19 +63,27 @@ export function apply(ctx: Context, config: Config) {
         return s
       })
 
+      const repeatInput = isSlash(argv)
+
       const re = (() => {
         try {
           return new RegExp(`^${pattern}$`)
         } catch {}
       })()
-      if (!re) return session.text(".invalid-pattern")
+      if (!re)
+        return repeatInput
+          ? session.text(".invalid-pattern-with-expr", [pattern])
+          : session.text(".invalid-pattern")
 
       let entries = ctx.xdi8.hanziToXdi8Transcriber.dict.filter(
         entry =>
           entry.x.match(re) &&
           !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h))
       )
-      if (!entries.length) return session.text(".no-result")
+      if (!entries.length)
+        return repeatInput
+          ? session.text(".no-result-with-expr", [pattern])
+          : session.text(".no-result")
 
       let regularEntries = []
       let legacyEntries = []
@@ -84,7 +93,10 @@ export function apply(ctx: Context, config: Config) {
       }
 
       if (options.legacy) {
-        if (!legacyEntries.length) return session.text(".no-result")
+        if (!legacyEntries.length)
+          return repeatInput
+            ? session.text(".no-result-legacy-with-expr", [pattern])
+            : session.text(".no-result")
         regularEntries = legacyEntries
         legacyEntries = []
       }
@@ -102,6 +114,14 @@ export function apply(ctx: Context, config: Config) {
         if (entry.n) line += `（${entry.n}）`
         return line
       })
+      if (repeatInput)
+        lines.unshift(
+          // prettier-ignore
+          session.text(
+            options.legacy ? ".result-header-legacy" : ".result-header",
+            [pattern]
+          )
+        )
       lines.push(
         (more ? "…" : "") +
           (legacyEntries.length

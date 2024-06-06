@@ -1,7 +1,7 @@
-import { Context, Schema, Session, h } from "koishi"
+import { Argv, Context, Schema, h } from "koishi"
 import type { Alternation, TranscribeResult } from "xdi8-transcriber"
 import type {} from "../service"
-import { doAhoFix, stripTags } from "../utils"
+import { doAhoFix, isSlash, stripTags } from "../utils"
 
 export const name = "xdi8"
 export const inject = ["xdi8"]
@@ -22,11 +22,13 @@ function supNum(n: number) {
 
 export function apply(ctx: Context, config: Config) {
   function stringifyResult<T extends "h" | "x">(
-    session: Session,
+    argv: Argv,
+    source: string,
     result: TranscribeResult,
     sourceType: T,
     { all = false }
   ) {
+    const { session } = argv
     const showLegacy = result.length === 1 || all
     const showExceptional = result.length === 1 || all || sourceType === "h"
     result = result
@@ -81,19 +83,24 @@ export function apply(ctx: Context, config: Config) {
       const source = seg[0].content.map(seg => seg[sourceType]).join("")
       const alts = seg.map(alt => {
         let line = alt.content.map(seg => seg.v).join("")
-        if (alt.note)
-          line += `（${alt.note.replace(/\n/g, "；")}）`
+        if (alt.note) line += `（${alt.note.replace(/\n/g, "；")}）`
         return line
       })
       return `${source}:\n${alts.join("\n")}`
     })
 
-    if (single && footnotes.length === 1) return h.escape(footnotes[0])
+    if (single && footnotes.length === 1)
+      return [isSlash(argv) && session.text(".input", [source]), h.escape(footnotes[0])]
+        .filter(Boolean)
+        .join("\n")
 
-    return [text, footnotes.map((fn, i) => `[${i + 1}] ${fn}`).join("\n")]
-      .map(s => h.escape(s))
+    return [
+      isSlash(argv) && session.text(".input", [source]),
+      h.escape(text),
+      h.escape(footnotes.map((fn, i) => `[${i + 1}] ${fn}`).join("\n")),
+    ]
       .filter(Boolean)
-      .join(config.footnotesInSeparateMessage ? "<message />" : "\n")
+      .join(session.resolve(config.footnotesInSeparateMessage) ? "<message />" : "\n")
   }
 
   function getResultScore(result: TranscribeResult) {
@@ -110,7 +117,8 @@ export function apply(ctx: Context, config: Config) {
     checkUnknown: true,
     showWarning: true,
   })
-  cmdXdi8.option("all", "-a").action(({ options, session }, els) => {
+  cmdXdi8.option("all", "-a").action((argv, els) => {
+    const { options, session } = argv
     const text = stripTags(els).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
     const hxResult = ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, {
@@ -124,9 +132,9 @@ export function apply(ctx: Context, config: Config) {
 
     if (!hxScore && !xhScore) return session.text(".no-result")
 
-    if (hxScore > xhScore) return stringifyResult(session, hxResult, "h", options)
+    if (hxScore > xhScore) return stringifyResult(argv, text, hxResult, "h", options)
 
     const xhResultCompact = xhResult.filter(seg => seg !== " ")
-    return stringifyResult(session, xhResultCompact, "x", options)
+    return stringifyResult(argv, text, xhResultCompact, "x", options)
   })
 }

@@ -2,7 +2,7 @@ import { compileMandarin, compileShidinn, draw } from "@dgck81lnn/lnnzhyz2svg"
 import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
 import type {} from "@koishijs/plugin-help"
 import { Context, Schema, h } from "koishi"
-import { stripTags } from "../utils"
+import { isSlash, stripTags } from "../utils"
 
 export const name = "lnnzhyz"
 export const inject = ["component:html"]
@@ -45,7 +45,11 @@ export function apply(ctx: Context, config: Config) {
   cmd.option("type", "-s", { value: "shidinn", hidden: true })
   cmd.option("type", "-m", { value: "mandarin", hidden: true })
   cmd.option("type", "-n", { value: "notation", hidden: true })
-  cmd.action(async ({ options: { compile: compileOnly, type }, session }, els) => {
+  cmd.action(async (argv, els) => {
+    const {
+      options: { compile: compileOnly, type },
+      session,
+    } = argv
     const text = stripTags(els)
 
     if (compileOnly && type === "notation")
@@ -90,33 +94,49 @@ export function apply(ctx: Context, config: Config) {
       .replace(/\ufdd0/g, "<")
 
     if (!someOk) return session.text(".no-valid-phrase")
-    if (compileOnly) return result
+    if (compileOnly)
+      return [
+        isSlash(argv) &&
+          session.text(".header-compile", { type: session.text(`.${type}`), text }),
+        h.escape(result),
+      ]
+        .filter(Boolean)
+        .join("<message/>")
 
     return (
-      <html>
-        <style>{
-          /*css*/ `
+      <>
+        {isSlash(argv)
+          ? h.parse(
+              type === "notation"
+                ? session.text(".header-notation", { text })
+                : session.text(".header", { type: session.text(`.${type}`), text })
+            )
+          : ""}
+        <html>
+          <style>{
+            /*css*/ `
             img {
               height: 1.1875em;
               vertical-align: text-bottom;
             }`
-        }</style>
-        <div
-          style={{
-            width: "auto",
-            height: "auto",
-            maxWidth: config.width,
-            lineHeight: "1",
-            padding: config.padding,
-            fontSize: `${config.fontSize}px`,
-            fontFamily: config.fontFamily,
-            whiteSpace: "pre-wrap",
-            overflowWrap: "break-word",
-          }}
-        >
-          {h.parse(result.replace(/\n/g, "<br />"))}
-        </div>
-      </html>
+          }</style>
+          <div
+            style={{
+              width: "auto",
+              height: "auto",
+              maxWidth: config.width,
+              lineHeight: "1",
+              padding: config.padding,
+              fontSize: `${config.fontSize}px`,
+              fontFamily: config.fontFamily,
+              whiteSpace: "pre-wrap",
+              overflowWrap: "break-word",
+            }}
+          >
+            {h.parse(result.replace(/\n/g, "<br />"))}
+          </div>
+        </html>
+      </>
     )
   })
 }

@@ -1,4 +1,4 @@
-import { h } from "koishi"
+import { Argv, h } from "koishi"
 import type { Alternation } from "xdi8-transcriber"
 
 export const ahoFixes: Record<string, string[]> = {
@@ -44,4 +44,8 @@ export function stripTags(els: string | h[]) {
       .replace(/^(\s*\ufdd1)+|(\ufdd1\s*)+$/g, "")
       .replace(/\ufdd1(?:\s*\ufdd1)*/g, "\n")
   )
+}
+
+export function isSlash(argv: Argv): boolean {
+  return argv.session.event.type === "interaction/command"
 }

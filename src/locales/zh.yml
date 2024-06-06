@@ -9,6 +9,7 @@ commands:
     options:
       all: 显示隐藏结果
     messages:
+      input: <b>希顶转换：</b>{0}
       no-result: 未找到可转换的字词。
   xdi8-grep:
     description: 从字表正则搜索希顶词
@@ -25,7 +26,12 @@ commands:
       legacy: 只搜索旧拼写
     messages:
       no-result: 未找到符合条件的希顶词。
+      no-result-with-expr: 未找到匹配正则表达式 <b>{0}</b> 的希顶词。
+      no-result-legacy-with-expr: 未找到匹配正则表达式 <b>{0}</b> 的希顶旧拼写。
+      result-header: 匹配正则表达式 <b>{0}</b> 的希顶词：
+      result-header-legacy: 匹配正则表达式 <b>{0}</b> 的希顶旧拼写：
       invalid-pattern: 无效的正则表达式。
+      invalid-pattern-with-expr: 无效的正则表达式：<b>{0}</b>
       result-footer: 共 {0} 条结果。
       result-footer-with-legacy: 共 {0} 条结果（{1} 条旧拼写）。
   xegoe:
@@ -57,3 +63,8 @@ commands:
     messages:
       no-valid-phrase: 未发现可转写的词语。
       cannot-compile-notation: compile 模式下输入类型不能为 notation。
+      header: <b>{type} LNN 中华语字：</b>{text}
+      header-notation: <b>LNN 中华语字：</b>{text}
+      header-compile: <b>{type}转 LNN 中华语字序列化格式：</b>{text}
+      shidinn: 希顶
+      mandarin: 普通话
