@@ -22,7 +22,8 @@ export function doAhoFix(seg: Alternation[]): [good: Alternation[], bad: Alterna
   return [good, bad]
 }
 
-export function stripTags(els: h[]) {
+export function stripTags(els: string | h[]) {
+  if (typeof els === "string") return els
   return h.unescape(
     h
       .transform(els.join("").replace(/[\ufdd0\ufdd1]/g, "\ufffd"), {
