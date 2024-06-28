@@ -67,7 +67,7 @@ export function apply(ctx: Context, config: Config) {
 
       const re = (() => {
         try {
-          return new RegExp(`^${pattern}$`)
+          return new RegExp(`^(?:${pattern})$`)
         } catch {}
       })()
       if (!re)
