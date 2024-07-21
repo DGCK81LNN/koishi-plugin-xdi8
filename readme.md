@@ -265,9 +265,9 @@ xdi8\
 4oquV 4o_quV\
 y353 y3_53</code>
 
-    x+dieng
+    x+dien
     w+oo+quei woo_quei
-    yj+en+ngwen yjen_ngwen
+    yj+eng+ngweng yjeng_ngweng
 
 `lnnzhyz -cm xi1_ding3_deng1`
 
