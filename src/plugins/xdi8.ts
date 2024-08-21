@@ -1,4 +1,4 @@
-import { Argv, Context, Schema, h } from "koishi"
+import { Argv, Computed, Context, Schema, h } from "koishi"
 import type { Alternation, TranscribeResult } from "xdi8-transcriber"
 import type {} from "../service"
 import { doAhoFix, isSlash, stripTags } from "../utils"
@@ -7,11 +7,11 @@ export const name = "xdi8"
 export const inject = ["xdi8"]
 
 export interface Config {
-  footnotesInSeparateMessage: boolean
+  footnotesInSeparateMessage: Computed<boolean>
 }
 
 export const Config: Schema<Config> = Schema.object({
-  footnotesInSeparateMessage: Schema.boolean()
+  footnotesInSeparateMessage: Schema.computed(Schema.boolean())
     .description("是否将结果正文与脚注分成两条消息发送。")
     .default(true),
 })

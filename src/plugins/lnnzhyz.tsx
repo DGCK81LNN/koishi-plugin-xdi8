@@ -101,7 +101,7 @@ export function apply(ctx: Context, config: Config) {
         h.escape(result),
       ]
         .filter(Boolean)
-        .join("<message/>")
+        .join("<br/>")
 
     return (
       <>
