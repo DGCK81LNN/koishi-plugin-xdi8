@@ -1,0 +1,71 @@
+commands:
+  xdi8:
+    description: Hanzi ↔︎ Shidinn conversion
+    arguments:
+      text: text
+    usage: |-
+      When the "all" option is enabled, normally hidden results including legacy spellings and traditional variants of Hanzi will be shown.
+      When the input is a single Hanzi or Shidinn "word", however, almost all otherwise hidden results will be included without having to enable the "all" option.
+    options:
+      all: show hidden results
+    messages:
+      input: <b>Shidinn transcribe:</b> {0}
+      no-result: Nothing to transcribe.
+  xdi8-grep:
+    description: Find shidinn words by regular expression
+    arguments:
+      pattern: 正则表达式
+    usage: |-
+      Special escape sequences are available for matching categories of Shidinn letters:
+      \c — consonant
+      \g — glide
+      \v — vowel
+      For example, "\c\g\v.H" matches words in the form CGVRH.
+      Capitalize the escape to select any shidinn letter <i>not</i> belonging to the respective category; for example, \C matches a non-consonant.
+    options:
+      legacy: legacy spellings only
+    messages:
+      no-result: No matching Shidinn word found.
+      no-result-with-expr: No Shidinn word found matching regex <b>{0}</b>.
+      no-result-legacy-with-expr: No outdated Shidinn word found matching regex <b>{0}</b>.
+      result-header: "Shidinn words matching regex <b>{0}</b>:"
+      result-header-legacy: "Outdated Shidinn words matching regex <b>{0}</b>:"
+      invalid-pattern: Invalid regular expression.
+      invalid-pattern-with-expr: "Invalid regular expression: <b>{0}</b>"
+      result-footer: "{0} matches found."
+      result-footer-with-legacy: "{0} matches found ({1} outdated)."
+  xegoe:
+    description: Render Shidinn letters to image
+    usage: |-
+      Render Shidinn Chat Alphabet or PUA Encoding with a Shidinn font, optionally annotating Hanzi with rubytext.
+      Option "x2h" disables annotating Hanzi in the input, instead converting Shidinn words to Hanzi. Words must be separated by spaces.
+    arguments:
+      text: 文本
+    options:
+      all: When working with Hanzi, show all possible conversion results.
+      x2h: Shidinn to Hanzi mode
+    messages:
+      no-shidinn-letter-or-hanzi: No Shidinn letter or annotatable Hanzi found.
+      no-shidinn-word: "No valid Shidinn word found. (note: separate words with spaces)"
+  lnnzhyz:
+    description: Render LNNZHYZ
+    arguments:
+      text: text
+    usage: |-
+      Input format: Separate words with spaces, and separate <i>zi</i> within a word with underscores. Add a "^" before a zi to insert a proper name mark. Replace an underscore with a dash to insert a hyphen.
+      "Input type" accepts one of these values:
+          <i>xdi8</i> or <i>shidinn</i> (Shidinn Chat Alphabet)
+          <i>mandarin</i> ("Semi-Modified Pinyin")
+          <i>notation</i> (LNNZHYZ serialization notation)
+      You can also use the initial letters of these keywords as short options: -x, -s, -m, -n
+    options:
+      type: Input type
+      compile: Convert input to serialization notation only
+    messages:
+      no-valid-phrase: Nothing to transcribe.
+      cannot-compile-notation: Input type cannot be "notation" when the compile mode is enabled.
+      header: "<b>{type} LNNZHYZ: </b>{text}"
+      header-notation: "<b>LNNZHYZ: </b>{text}"
+      header-compile: "<b>{type} to LNNZHYZ serialization notation: </b>{text}"
+      shidinn: Shidinn
+      mandarin: Mandarin

@@ -99,6 +99,7 @@ export const Config = Schema.object({
 
 export function apply(ctx: Context, config: Config) {
   ctx.i18n.define("zh", require("./locales/zh"))
+  ctx.i18n.define("en", require("./locales/en"))
 
   ctx.plugin(Xdi8)
   if (config.xdi8.enabled) ctx.plugin(pluginXdi8, config.xdi8)
