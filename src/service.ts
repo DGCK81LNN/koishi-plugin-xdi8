@@ -19,7 +19,7 @@ export default class Xdi8 extends Service {
     super(ctx, "xdi8", true)
   }
 
-  private _data = data
+  private _data: Data = data
   private _hanziToXdi8Transcriber: HanziToAlphaTranscriber | null = null
   private _xdi8ToHanziTranscriber: AlphaToHanziTranscriber | null = null
 
