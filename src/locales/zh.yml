@@ -52,20 +52,22 @@ commands:
     arguments:
       text: 文本
     usage: |-
-      输入格式：请以空格分隔词语，用下划线分隔同一词语中的各字。在字前加“^”以插入专名标记。用横杠代替下划线以插入连字符。
-      “输入类型”可设为以下值：
-          xdi8 或 shidinn — 希顶语（聊天字母）
-          mandarin — 普通话（「半魔改拼音」）
-          notation — LNN 中华语字通用序列化格式
-      也可使用类型名称的首字母作为短选项使用：-x, -s, -m, -n
+      输入格式：请以空格分隔词语，用下划线分隔同一词语中的各字。在字前加“^”以插入专名标记。用横杠代替下划线以插入连字符。或者，若要以 PUA 输入，请使用“pua”输入类型。
     options:
-      type: 输入类型
+      type.shidinn: 输入希顶语（聊天字母）（默认）
+      type.mandarin: 输入普通话（「半魔改拼音」）
+      type.notation: 输入LNN 中华语字通用序列化格式
+      type.pua: 输入 LNN 密文 PUA 编码
       compile: 仅将输入文本转换为通用序列化格式
+      toPua: 仅将输入文本转换为 LNN 密文 PUA 编码
+      size: 字体大小
+      weight: 绘制粗细（0 到 2 之间〔不含〕，默认为 1）
     messages:
       no-valid-phrase: 未发现可转写的词语。
-      cannot-compile-notation: compile 模式下输入类型不能为 notation。
+      options-conflict: 选项冲突，请检查。
       header: <b>{type} LNN 中华语字：</b>{text}
       header-notation: <b>LNN 中华语字：</b>{text}
       header-compile: <b>{type}转 LNN 中华语字序列化格式：</b>{text}
+      header-out-pua: <b>{type}转 LNN 密文 PUA 编码：</b>{text}
       shidinn: 希顶
       mandarin: 普通话

@@ -52,20 +52,22 @@ commands:
     arguments:
       text: text
     usage: |-
-      Input format: Separate words with spaces, and separate <i>zi</i> within a word with underscores. Add a "^" before a zi to insert a proper name mark. Replace an underscore with a dash to insert a hyphen.
-      "Input type" accepts one of these values:
-          <i>xdi8</i> or <i>shidinn</i> (Shidinn Chat Alphabet)
-          <i>mandarin</i> ("Semi-Modified Pinyin")
-          <i>notation</i> (LNNZHYZ serialization notation)
-      You can also use the initial letters of these keywords as short options: -x, -s, -m, -n
+      Input format: Separate words with spaces, and separate <i>zi</i> within a word with underscores. Add a "^" before a zi to insert a proper name mark. Replace an underscore with a dash to insert a hyphen. Alternatively use the "pua" input type if you'd like to input PUA encoded text.
     options:
-      type: Input type
+      type.shidinn: Input in Shidinn Chat Alphabet
+      type.mandarin: Input in "Semi-Modified Pinyin"
+      type.notation: Input in LNNZHYZ serialization notation
+      type.pua: Input in LNN Ciphers PUA Encoding
       compile: Convert input to serialization notation only
+      toPua: Convert input to LNN Ciphers PUA Encoding
+      size: Font size
+      weight: Stroke width (between 0 and 2, exclusive, default 1)
     messages:
       no-valid-phrase: Nothing to transcribe.
-      cannot-compile-notation: Input type cannot be "notation" when the compile mode is enabled.
+      options-conflict: Conflicting options.
       header: "<b>{type} LNNZHYZ: </b>{text}"
       header-notation: "<b>LNNZHYZ: </b>{text}"
       header-compile: "<b>{type} to LNNZHYZ serialization notation: </b>{text}"
+      header-to-pua: "<b>LNNZHYZ to LNN Ciphers PUA Encoding: </b>{text}"
       shidinn: Shidinn
       mandarin: Mandarin

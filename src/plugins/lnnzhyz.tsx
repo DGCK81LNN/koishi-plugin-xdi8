@@ -1,4 +1,4 @@
-import { compileMandarin, compileShidinn, draw } from "@dgck81lnn/lnnzhyz2svg"
+import { compileMandarin, compileShidinn, draw, PUA } from "@dgck81lnn/lnnzhyz2svg"
 import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
 import type {} from "@koishijs/plugin-help"
 import { Context, Schema, h } from "koishi"
@@ -30,74 +30,105 @@ export function apply(ctx: Context, config: Config) {
       checkUnknown: true,
       showWarning: true,
     })
-    .option("compile", "-c")
     .option("type", "<type>", {
       type: str => {
         if ("xdi8".startsWith(str)) return "shidinn" as const
         if ("shidinn".startsWith(str)) return "shidinn" as const
         if ("mandarin".startsWith(str)) return "mandarin" as const
         if ("notation".startsWith(str)) return "notation" as const
+        if ("pua".startsWith(str)) return "pua" as const
         throw new TypeError("invalid type")
       },
+      hidden: true,
       fallback: "shidinn",
     })
-  cmd.option("type", "-x", { value: "shidinn", hidden: true })
-  cmd.option("type", "-s", { value: "shidinn", hidden: true })
-  cmd.option("type", "-m", { value: "mandarin", hidden: true })
-  cmd.option("type", "-n", { value: "notation", hidden: true })
+    .option("compile", "-c")
+    .option("toPua", "-P")
+    .option("size", "-X <css-font-size:string>")
+    .option("weight", "-w <value>", {
+      type: str => {
+        const value = +str
+        if (!(value > 0 && value < 2)) throw new RangeError()
+        return value
+      },
+      fallback: 1,
+    })
+  cmd.option("type", "-x", { value: "shidinn" })
+  cmd.option("type", "-s", { value: "shidinn" })
+  cmd.option("type", "-m", { value: "mandarin" })
+  cmd.option("type", "-n", { value: "notation" })
+  cmd.option("type", "-p", { value: "pua" })
   cmd.action(async (argv, els) => {
     const {
-      options: { compile: compileOnly, type },
+      options: { compile: compileOnly, toPua, type, size, weight },
       session,
     } = argv
     const text = stripTags(els)
 
-    if (compileOnly && type === "notation")
-      return session.text(".cannot-compile-notation")
+    if (
+      (compileOnly && type === "notation") ||
+      (compileOnly && toPua) ||
+      (toPua && type === "pua")
+    )
+      return session.text(".options-conflict")
 
     let someOk = false
-    const compileFn = {
-      shidinn: compileShidinn,
-      mandarin: compileMandarin,
-      notation: deserializeText,
-    }[type]
-    const phraseRe =
-      type === "notation"
-        ? /\^?[~\dA-Z]+(?:[+ _-]\^?[~\dA-Z]+)*/gi
-        : /\^?[\dA-Z]+(?:[ _-]\^?[\dA-Z]+)*/gi
 
-    const result = text
-      .replace(/\ufdd0/g, "\ufffd")
-      .replace(/</g, "\ufdd0")
-      .replace(phraseRe, phrase => {
-        const words = phrase.split(" ")
-        const results: string[] = []
-        outer: do {
-          for (let i = words.length; i > 0; i--) {
-            try {
-              const clause = compileFn(words.slice(0, i).join(" "))
-              results.push(
-                compileOnly
-                  ? serializeText(clause)
-                  : `<img src="data:image/svg+xml,${h.escape(draw(clause), true)}" />`
-              )
-              someOk = true
-              words.splice(0, i)
-              continue outer
-            } catch {}
+    let result = text.replace(/\ufdd0/g, "\ufffd").replace(/</g, "\ufdd0")
+    if (type === "pua") {
+      let ok = false
+      result = PUA.parseMixed(result)
+        .map(seg => {
+          const prevOk = ok
+          ok = typeof seg !== "string"
+          if (typeof seg === "string") return seg
+          someOk = true
+
+          if (compileOnly) {
+            let s = serializeText([seg])
+            if (prevOk) return " " + s
+            return s
           }
-          const word = words.shift()
-          results.push(compileOnly ? word : `<span style="color:red">${word}</span>`)
-        } while (words.length)
-        return results.join(" ")
-      })
-      .replace(/\ufdd0/g, "<")
 
+          return draw([seg], { strokeWidth: weight }).replace("viewBox", "viewbox")
+        })
+        .join("")
+    } else {
+      const compileFn = {
+        shidinn: compileShidinn,
+        mandarin: compileMandarin,
+        notation: deserializeText,
+      }[type]
+      const phraseRe =
+        type === "notation"
+          ? /\^?[~\dA-Z]+(?:[+_-]\^?[~\dA-Z]+)*/gi
+          : /\^?[\dA-Z]+(?:[_-]\^?[\dA-Z]+)*/gi
+
+      result = result.replace(phraseRe, word => {
+        try {
+          const ct = compileFn(word)
+          const result = compileOnly
+            ? serializeText(ct)
+            : toPua
+            ? PUA.stringifyText(ct, { mandarin: type === "mandarin" })
+            : draw(ct, { strokeWidth: weight }).replace("viewBox", "viewbox")
+          someOk = true
+          return result
+        } catch {
+          return `<span style="color:red">${word}</span>`
+        }
+      })
+    }
     if (!someOk) return session.text(".no-valid-phrase")
-    if (compileOnly)
+    result = result.replace(/\ufdd0/g, "<")
+
+    if (compileOnly || toPua)
       return [
         isSlash(argv) &&
-          session.text(".header-compile", { type: session.text(`.${type}`), text }),
+          session.text(toPua ? "header-to-pua" : ".header-compile", {
+            type: session.text(`.${type}`),
+            text,
+          }),
         h.escape(result),
       ]
         .filter(Boolean)
@@ -113,13 +144,6 @@ export function apply(ctx: Context, config: Config) {
             )
           : ""}
         <html>
-          <style>{
-            /*css*/ `
-            img {
-              height: 1.1875em;
-              vertical-align: text-bottom;
-            }`
-          }</style>
           <div
             style={{
               width: "auto",
@@ -127,7 +151,7 @@ export function apply(ctx: Context, config: Config) {
               maxWidth: config.width,
               lineHeight: "1",
               padding: config.padding,
-              fontSize: `${config.fontSize}px`,
+              fontSize: size || `${config.fontSize}px`,
               fontFamily: config.fontFamily,
               whiteSpace: "pre-wrap",
               overflowWrap: "break-word",
