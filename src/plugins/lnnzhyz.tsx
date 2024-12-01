@@ -114,10 +114,13 @@ export function apply(ctx: Context, config: Config) {
             : draw(ct, { strokeWidth: weight }).replace("viewBox", "viewbox")
           someOk = true
           return result
-        } catch {
+        } catch (err) {
+          ctx.logger.debug(err)
+          if (compileOnly || toPua) return word
           return `<span style="color:red">${word}</span>`
         }
       })
+      result = result.replace(/<\/svg> <svg/g, "</svg><svg")
     }
     if (!someOk) return session.text(".no-valid-phrase")
     result = result.replace(/\ufdd0/g, "<")
