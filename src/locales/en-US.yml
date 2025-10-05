@@ -24,6 +24,8 @@ commands:
       Capitalize the escape to select any shidinn letter <i>not</i> belonging to the respective category; for example, \C matches a non-consonant.
     options:
       legacy: legacy spellings only
+      perPage: results per page
+      page: page number (1-based, 0 for random samples)
     messages:
       no-result: No matching Shidinn word found.
       no-result-with-expr: No Shidinn word found matching regex <b>{0}</b>.
@@ -32,8 +34,8 @@ commands:
       result-header-legacy: "Outdated Shidinn words matching regex <b>{0}</b>:"
       invalid-pattern: Invalid regular expression.
       invalid-pattern-with-expr: "Invalid regular expression: <b>{0}</b>"
-      result-footer: "{0} matches found."
-      result-footer-with-legacy: "{0} matches found ({1} outdated)."
+      result-footer: "{0} results on {1} pages."
+      result-footer-with-legacy: "{0} results ({1} outdated) on {2} pages."
   xegoe:
     description: Render Shidinn letters to image
     usage: |-
