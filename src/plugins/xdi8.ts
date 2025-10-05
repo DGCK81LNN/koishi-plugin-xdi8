@@ -1,7 +1,7 @@
 import { Argv, Computed, Context, Schema, h } from "koishi"
 import type { Alternation, TranscribeResult } from "xdi8-transcriber"
 import type {} from "../service"
-import { doAhoFix, isSlash, stripTags } from "../utils"
+import { doAhoFix, isSlash } from "../utils"
 
 export const name = "xdi8"
 export const inject = ["xdi8"]
@@ -112,14 +112,14 @@ export function apply(ctx: Context, config: Config) {
     )
   }
 
-  const cmdXdi8 = ctx.command("xdi8 <text:el>", {
+  const cmdXdi8 = ctx.command("xdi8 <text:rawtext>", {
     checkArgCount: true,
     checkUnknown: true,
     showWarning: true,
   })
-  cmdXdi8.option("all", "-a").action((argv, els) => {
+  cmdXdi8.option("all", "-a").action((argv, text) => {
     const { options, session } = argv
-    const text = stripTags(els).replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
+    text = text.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
     const hxResult = ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, {
       ziSeparator: " ",

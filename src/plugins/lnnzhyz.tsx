@@ -2,7 +2,7 @@ import { compileMandarin, compileShidinn, draw, PUA } from "@dgck81lnn/lnnzhyz2s
 import { deserializeText, serializeText } from "@dgck81lnn/lnnzhyz2svg/notation"
 import type {} from "@koishijs/plugin-help"
 import { Context, Schema, h } from "koishi"
-import { isSlash, stripTags } from "../utils"
+import { isSlash } from "../utils"
 
 export const name = "lnnzhyz"
 export const inject = ["component:html"]
@@ -25,7 +25,7 @@ export const Config: Schema<Config> = Schema.object({
 
 export function apply(ctx: Context, config: Config) {
   const cmd = ctx
-    .command("lnnzhyz <text:el>", {
+    .command("lnnzhyz <text:rawtext>", {
       checkArgCount: true,
       checkUnknown: true,
       showWarning: true,
@@ -58,12 +58,11 @@ export function apply(ctx: Context, config: Config) {
   cmd.option("type", "-m", { value: "mandarin" })
   cmd.option("type", "-n", { value: "notation" })
   cmd.option("type", "-p", { value: "pua" })
-  cmd.action(async (argv, els) => {
+  cmd.action(async (argv, text) => {
     const {
       options: { compile: compileOnly, toPua, type, size, weight },
       session,
     } = argv
-    const text = stripTags(els)
 
     if (
       (compileOnly && type === "notation") ||
