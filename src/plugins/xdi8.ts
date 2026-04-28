@@ -73,6 +73,9 @@ export function apply(ctx: Context, config: Config) {
             index = alts.length
             alts.push(Object.assign(seg, { $: j }))
           }
+          // 汉转希时，若一个汉字的所有拼写都为旧拼写（即最新字表已删除该字），则不转换，输出转换前的汉字，但依然显示脚注
+          if (sourceType === "h" && seg[0].legacy)
+            return seg[0].content.map(seg => seg.h).join("") + supNum(index + 1)
           return seg[0].content.map(seg => seg.v).join("") + supNum(index + 1)
         }
         return seg.v

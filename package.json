@@ -1,7 +1,7 @@
 {
   "name": "koishi-plugin-xdi8",
   "description": "Shidinn tools for Koishi",
-  "version": "1.2.5",
+  "version": "1.3.0",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -44,6 +44,6 @@
   "dependencies": {
     "@dgck81lnn/lnnzhyz2svg": "^0.4.1",
     "@satorijs/element": "^2.6.1",
-    "xdi8-transcriber": "^0.3.5"
+    "xdi8-transcriber": "^0.3.9"
   }
 }
