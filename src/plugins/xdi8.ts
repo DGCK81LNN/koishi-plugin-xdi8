@@ -20,6 +20,16 @@ function supNum(n: number) {
   return Array.from(String(0 | n), (d: `${number}`) => "⁰¹²³⁴⁵⁶⁷⁸⁹"[d]).join("")
 }
 
+export function fullWidthToHalfWidth(text: string): string {
+  return text
+    .replace(/[！，．：；？](?!$)/gm, "$& ")
+    .replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xfee0))
+    .replace(/。$/gm, ".")
+    .replace(/、$/gm, ",")
+    .replace(/。/g, ". ")
+    .replace(/、/g, ", ")
+}
+
 export function apply(ctx: Context, config: Config) {
   function stringifyResult<T extends "h" | "x">(
     argv: Argv,
@@ -63,7 +73,7 @@ export function apply(ctx: Context, config: Config) {
     const single = result.length === 1 && Array.isArray(result[0])
 
     const alts: (Alternation[] & { $: string })[] = []
-    const text = result
+    let text = result
       .map(seg => {
         if (typeof seg === "string") return seg
         if (Array.isArray(seg)) {
@@ -81,6 +91,7 @@ export function apply(ctx: Context, config: Config) {
         return seg.v
       })
       .join("")
+    if (sourceType === "h") text = fullWidthToHalfWidth(text)
 
     const footnotes = alts.map(seg => {
       const source = seg[0].content.map(seg => seg[sourceType]).join("")
