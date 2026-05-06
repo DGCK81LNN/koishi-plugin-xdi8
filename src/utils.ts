@@ -1,8 +1,10 @@
-import { Argv, h } from "koishi"
+import { Argv } from "koishi"
 import type { Alternation } from "xdi8-transcriber"
 
 export const ahoFixes: Record<string, string[]> = {
   aho: ["纟火", "糹火"],
+  afa: ["𦅠"],
+  atiY: ["𲸰"],
 }
 /**
  * Some entries have hanzi froms that include PUA characters which will not display in
