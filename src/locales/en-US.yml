@@ -27,6 +27,7 @@ commands:
       Capitalize the escape to select any shidinn letter <i>not</i> belonging to the respective category; for example, \C matches a non-consonant.
     options:
       legacy: legacy spellings only
+      legacy.false: exclude legacy spellings
       perPage: results per page
       page: page number (1-based, 0 for random samples)
     messages:

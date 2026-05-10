@@ -27,6 +27,7 @@ commands:
       将转义字母大写以选择补集，如 \C 匹配非声母。
     options:
       legacy: 只搜索旧拼写
+      legacy.false: 不包括旧拼写
       perPage: 每页结果数
       page: 页码（从 1 开始，为 0 则随机显示）
     messages:

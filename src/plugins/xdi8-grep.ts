@@ -40,9 +40,9 @@ export function apply(ctx: Context, config: Config) {
     .command("xdi8-grep <pattern:string>", {
       checkArgCount: true,
       checkUnknown: true,
-      showWarning: true,
     })
-    .option("legacy", "-l", { fallback: false })
+    .option("legacy", "-l")
+    .option("legacy", "-L, --no-legacy", { value: false })
     .option("perPage", "-n <n:natural>", { fallback: 20 })
     .option("page", "-p <p:natural>")
     .action((argv, pattern) => {
@@ -71,18 +71,18 @@ export function apply(ctx: Context, config: Config) {
         } catch {}
       })()
       if (!re)
-        return repeatInput
-          ? session.i18n(".invalid-pattern-with-expr", [pattern])
+        return repeatInput ?
+            session.i18n(".invalid-pattern-with-expr", [pattern])
           : session.i18n(".invalid-pattern")
 
       let entries = ctx.xdi8.xdi8ToHanziTranscriber.dict.filter(
         entry =>
           entry.x.match(re) &&
-          !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h))
+          !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h)),
       )
       if (!entries.length)
-        return repeatInput
-          ? session.i18n(".no-result-with-expr", [pattern])
+        return repeatInput ?
+            session.i18n(".no-result-with-expr", [pattern])
           : session.i18n(".no-result")
 
       let regularEntries = []
@@ -92,13 +92,18 @@ export function apply(ctx: Context, config: Config) {
         else if (!options.legacy) regularEntries.push(entry)
       }
 
-      if (options.legacy) {
-        if (!legacyEntries.length)
-          return repeatInput
-            ? session.i18n(".no-result-legacy-with-expr", [pattern])
-            : session.i18n(".no-result")
-        regularEntries = legacyEntries
+      if (options.legacy != null) {
+        regularEntries = options.legacy ? legacyEntries : regularEntries
         legacyEntries = []
+        if (!regularEntries.length)
+          return repeatInput ?
+              session.i18n(
+                options.legacy ?
+                  ".no-result-legacy-with-expr"
+                : ".no-result-non-legacy-with-expr",
+                [pattern],
+              )
+            : session.i18n(".no-result")
       }
 
       let perPage = options.perPage
@@ -115,7 +120,7 @@ export function apply(ctx: Context, config: Config) {
       } else {
         entries = [...regularEntries, ...legacyEntries].slice(
           pageIndex * perPage,
-          (pageIndex + 1) * perPage
+          (pageIndex + 1) * perPage,
         )
       }
 
@@ -127,7 +132,7 @@ export function apply(ctx: Context, config: Config) {
               if (entry.n) line += `（${entry.n}）`
               return line
             })
-            .join("\n")
+            .join("\n"),
         ),
       ]
       if (repeatInput)
@@ -142,8 +147,9 @@ export function apply(ctx: Context, config: Config) {
         ]
       if (pageIndex <= 0) {
         const pageCount = Math.ceil(resultCount / perPage)
-        const footer = legacyEntries.length
-          ? session.i18n(".result-footer-with-legacy", [
+        const footer =
+          legacyEntries.length ?
+            session.i18n(".result-footer-with-legacy", [
               resultCount,
               legacyEntries.length,
               pageCount,
