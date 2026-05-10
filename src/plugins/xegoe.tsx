@@ -84,21 +84,21 @@ function formatResult<T extends "h" | "x">(
 
   const single = result.length === 1 && Array.isArray(result[0])
 
-  const alts: (Alternation[] & { $: string })[] = []
+  const alts: (Alternation[] & { source: string })[] = []
   const body = result.flatMap<h | string>(seg => {
     if (typeof seg === "string") return [chatToXdPUA(seg)]
     if (Array.isArray(seg)) {
+      const source = seg[0].content.map(s => s[sourceType]).join("")
       const legacyOnly = !seg[0].legacy && seg.slice(1).every(alt => alt.legacy)
       let className = "selectable"
       if (legacyOnly) className += " selectable-legacyonly"
       const els = [ruby(seg[0].content, className)]
 
       if (all || (sourceType === "h" && !legacyOnly)) {
-        const j = JSON.stringify(seg)
-        let index = alts.findIndex(s => s.$ === j)
+        let index = alts.findIndex(s => s.source === source)
         if (index === -1) {
           index = alts.length
-          alts.push(Object.assign(seg, { $: j }))
+          alts.push(Object.assign(seg, { source }))
         }
         els.push(<sup>[{index + 1}]</sup>)
       }

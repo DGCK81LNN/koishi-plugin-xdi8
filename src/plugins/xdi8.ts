@@ -72,16 +72,16 @@ export function apply(ctx: Context, config: Config) {
 
     const single = result.length === 1 && Array.isArray(result[0])
 
-    const alts: (Alternation[] & { $: string })[] = []
+    const alts: (Alternation[] & { source: string })[] = []
     let text = result
       .map(seg => {
         if (typeof seg === "string") return seg
         if (Array.isArray(seg)) {
-          const j = JSON.stringify(seg)
-          let index = alts.findIndex(s => s.$ === j)
+          const source = seg[0].content.map(s => s[sourceType]).join("")
+          let index = alts.findIndex(s => s.source === source)
           if (index === -1) {
             index = alts.length
-            alts.push(Object.assign(seg, { $: j }))
+            alts.push(Object.assign(seg, { source }))
           }
           // 汉转希时，若一个汉字的所有拼写都为旧拼写（即最新字表已删除该字），则不转换，输出转换前的汉字，但依然显示脚注
           if (sourceType === "h" && seg[0].legacy)
