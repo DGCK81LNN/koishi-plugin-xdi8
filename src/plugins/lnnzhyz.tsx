@@ -28,7 +28,6 @@ export function apply(ctx: Context, config: Config) {
     .command("lnnzhyz <text:rawtext>", {
       checkArgCount: true,
       checkUnknown: true,
-      showWarning: true,
     })
     .option("type", "<type>", {
       type: str => {
@@ -99,17 +98,16 @@ export function apply(ctx: Context, config: Config) {
         notation: deserializeText,
       }[type]
       const phraseRe =
-        type === "notation"
-          ? /\^?[~\dA-Z]+(?:[+_-]\^?[~\dA-Z]+)*/gi
-          : /\^?[\dA-Z]+(?:[_-]\^?[\dA-Z]+)*/gi
+        type === "notation" ? /\^?[~\dA-Z]+(?:[+_-]\^?[~\dA-Z]+)*/gi
+        : type === "shidinn" ? /\^?[\dA-Z]+('[\dA-Z]+)*(?:[_-]\^?[\dA-Z]+('[\dA-Z]+)*)*/gi
+        : /\^?[\dA-Z]+(?:[_-]\^?[\dA-Z]+)*/gi
 
       result = result.replace(phraseRe, word => {
         try {
           const ct = compileFn(word)
-          const result = compileOnly
-            ? serializeText(ct)
-            : toPua
-            ? PUA.stringifyText(ct, { mandarin: type === "mandarin" })
+          const result =
+            compileOnly ? serializeText(ct)
+            : toPua ? PUA.stringifyText(ct, { mandarin: type === "mandarin" })
             : draw(ct, { strokeWidth: weight }).replace("viewBox", "viewbox")
           someOk = true
           return result
@@ -138,13 +136,13 @@ export function apply(ctx: Context, config: Config) {
 
     return (
       <>
-        {isSlash(argv)
-          ? h.parse(
-              type === "notation"
-                ? session.text(".header-notation", { text })
-                : session.text(".header", { type: session.text(`.${type}`), text })
-            )
-          : ""}
+        {isSlash(argv) ?
+          h.parse(
+            type === "notation" ?
+              session.text(".header-notation", { text })
+            : session.text(".header", { type: session.text(`.${type}`), text }),
+          )
+        : ""}
         <html>
           <div
             style={{
