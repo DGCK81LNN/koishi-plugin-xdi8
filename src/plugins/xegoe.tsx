@@ -1,10 +1,12 @@
 import { Context, Schema, h } from "koishi"
 import {
   chatToXdPUA,
+  inferMainSyllablePosition,
   type AlphaToHanziTranscriber,
   type Alternation,
   type HanziToAlphaTranscriber,
   type TranscribeResult,
+  type TranscribedSegment,
 } from "xdi8-transcriber"
 import type {} from "../service"
 
@@ -23,7 +25,7 @@ export const Config: Schema<Config> = Schema.object({
   src: Schema.string()
     .description("字体源")
     .default(
-      'url("https://dgck81lnn.github.io/bootstrap-lnn/fonts/XEGOEPUAall.woff2") format("woff2")'
+      'url("https://dgck81lnn.github.io/bootstrap-lnn/fonts/XEGOEPUAall.woff2") format("woff2")',
     )
     .role("textarea"),
   fontSize: Schema.number().description("字号，单位 px").default(16),
@@ -36,32 +38,40 @@ export const Config: Schema<Config> = Schema.object({
 
 function hxTranscribe(
   ctx: { xdi8: { hanziToXdi8Transcriber: HanziToAlphaTranscriber } },
-  text: string
+  text: string,
 ) {
   return ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, { ziSeparator: "" })
 }
 
 function xhTranscribe(
   ctx: { xdi8: { xdi8ToHanziTranscriber: AlphaToHanziTranscriber } },
-  text: string
+  text: string,
 ) {
   return ctx.xdi8.xdi8ToHanziTranscriber.transcribe(text, { ziSeparator: " " })
 }
 
-function ruby(chars: { h: string; x: string; legacy?: boolean }[], className?: string) {
-  const ruby = chars.flatMap(({ h, x, legacy }) => (
-    <ruby class={[legacy && "char-legacy"]}>
-      {h}
-      <rt>{chatToXdPUA(x)}</rt>
-    </ruby>
-  ))
+function ruby(chars: Omit<TranscribedSegment, "v">[], className?: string) {
+  const ruby = chars.flatMap(({ h, x, xm, legacy }) => {
+    const [mainStart, mainEnd] = xm ?? inferMainSyllablePosition(x)
+    const xp = chatToXdPUA(x)
+    return (
+      <ruby class={[legacy && "char-legacy"]}>
+        {h}
+        <rt>
+          {xp.slice(0, mainStart)}
+          <span class="mainsyllable">{xp.slice(mainStart, mainEnd)}</span>
+          {xp.slice(mainEnd)}
+        </rt>
+      </ruby>
+    )
+  })
   return <span class={className}>{ruby}</span>
 }
 
 function formatResult<T extends "h" | "x">(
   result: TranscribeResult,
   sourceType: T,
-  { all = false }
+  { all = false },
 ) {
   if (result.length === 1 && typeof result[0] === "string") {
     if (sourceType === "h") {
@@ -78,7 +88,7 @@ function formatResult<T extends "h" | "x">(
   const body = result.flatMap<h | string>(seg => {
     if (typeof seg === "string") return [chatToXdPUA(seg)]
     if (Array.isArray(seg)) {
-      const legacyOnly = seg.slice(1).every(alt => alt.legacy)
+      const legacyOnly = !seg[0].legacy && seg.slice(1).every(alt => alt.legacy)
       let className = "selectable"
       if (legacyOnly) className += " selectable-legacyonly"
       const els = [ruby(seg[0].content, className)]
@@ -123,7 +133,6 @@ export function apply(ctx: Context, config: Config) {
     .command("xegoe <text:rawtext>", {
       checkArgCount: true,
       checkUnknown: true,
-      showWarning: true,
     })
     .option("all", "-a")
     .option("x2h", "-x")
@@ -142,6 +151,11 @@ export function apply(ctx: Context, config: Config) {
               src: ${config.src};
               font-display: block;
             }
+            rt {
+              vertical-align: 0.3em;
+              color: #678;
+            }
+            .mainsyllable { color: black }
             sup {
               font-size: 0.5em;
               color: #048;
@@ -163,9 +177,7 @@ export function apply(ctx: Context, config: Config) {
               margin: 0;
               padding-left: 0.5em;
             }
-            .char-legacy {
-              color: red;
-            }
+            .char-legacy { color: red }
             .footnotes-only ruby {
               font-size: 1.333333em;
             }`
