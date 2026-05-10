@@ -6,8 +6,11 @@ commands:
     usage: |-
       When the "all" option is enabled, normally hidden results including legacy spellings and traditional variants of Hanzi will be shown.
       When the input is a single Hanzi or Shidinn "word", however, almost all otherwise hidden results will be included without having to enable the "all" option.
+      When neither "decode" nor "encode" option is enabled, conversion direction will be inferred from input.
     options:
       all: show hidden results
+      decode: force Shidinn to Hanzi
+      encode: force Hanzi to Shidinn
     messages:
       input: <b>Shidinn transcribe:</b> {0}
       no-result: Nothing to transcribe.
@@ -73,3 +76,6 @@ commands:
       header-to-pua: "<b>LNNZHYZ to LNN Ciphers PUA Encoding: </b>{text}"
       shidinn: Shidinn
       mandarin: Mandarin
+lnnbot:
+  general:
+    options-conflict: Conflicting options, please check.

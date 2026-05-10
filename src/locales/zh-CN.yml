@@ -6,8 +6,11 @@ commands:
     usage: |-
       在文本前添加选项“-a”（与文本和指令名“xdi8”之间用空格隔开）来显示隐藏的结果，如过时拼写和希转汉时的部分繁体字。
       当文本为单个汉字或不包含空格的希顶“词”时，即使未启用“-a”选项也会默认显示绝大多数隐藏结果。
+      “-d”“-e”选项都未启用时，会根据输入自动推测转换方向。
     options:
       all: 显示隐藏结果
+      decode: 希顶转汉字
+      encode: 汉字转希顶
     messages:
       input: <b>希顶转换：</b>{0}
       no-result: 未找到可转换的字词。
@@ -73,3 +76,6 @@ commands:
       header-out-pua: <b>{type}转 LNN 密文 PUA 编码：</b>{text}
       shidinn: 希顶
       mandarin: 普通话
+lnnbot:
+  general:
+    options-conflict: 选项冲突，请检查。

@@ -36,7 +36,7 @@ export function apply(ctx: Context, config: Config) {
     source: string,
     result: TranscribeResult,
     sourceType: T,
-    { all = false }
+    { all = false },
   ) {
     const { session } = argv
     const showLegacy = result.length === 1 || all
@@ -122,28 +122,38 @@ export function apply(ctx: Context, config: Config) {
     return result.reduce(
       (score, seg) =>
         score + (Array.isArray(seg) ? seg[0].content.length : +(typeof seg === "object")),
-      0
+      0,
     )
   }
 
-  const cmdXdi8 = ctx.command("xdi8 <text:rawtext>", {
-    checkArgCount: true,
-    checkUnknown: true,
-    showWarning: true,
-  })
-  cmdXdi8.option("all", "-a").action((argv, text) => {
+  const cmd = ctx
+    .command("xdi8 <text:rawtext>", {
+      checkArgCount: true,
+      checkUnknown: true,
+    })
+    .option("all", "-a")
+    .option("decode", "-d")
+    .option("encode", "-e")
+  cmd.action((argv, text) => {
     const { options, session } = argv
     text = text.replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, "")
 
-    const hxResult = ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, {
-      ziSeparator: " ",
-    })
-    const hxScore = getResultScore(hxResult)
-    const xhResult = ctx.xdi8.xdi8ToHanziTranscriber.transcribe(text, {
-      alphaFilter: null,
-    })
-    const xhScore = getResultScore(xhResult)
+    let hxResult: TranscribeResult, xhResult: TranscribeResult
+    let hxScore = 0
+    let xhScore = 0
 
+    if (!options.decode) {
+      hxResult = ctx.xdi8.hanziToXdi8Transcriber.transcribe(text, {
+        ziSeparator: " ",
+      })
+      hxScore = getResultScore(hxResult)
+    }
+    if (!options.encode) {
+      xhResult = ctx.xdi8.xdi8ToHanziTranscriber.transcribe(text, {
+        alphaFilter: null,
+      })
+      xhScore = getResultScore(xhResult)
+    }
     if (!hxScore && !xhScore) return session.text(".no-result")
 
     if (hxScore > xhScore) return stringifyResult(argv, text, hxResult, "h", options)
