@@ -52,7 +52,7 @@ function xhTranscribe(
 
 function ruby(chars: Omit<TranscribedSegment, "v">[], className?: string) {
   const ruby = chars.flatMap(({ h, x, xm, legacy }) => {
-    const [mainStart, mainEnd] = xm ?? inferMainSyllablePosition(x)
+    const [mainStart, mainEnd] = xm ?? inferMainSyllablePosition(x) ?? [0, 0]
     const xp = chatToXdPUA(x)
     return (
       <ruby class={[legacy && "char-legacy"]}>
@@ -87,12 +87,19 @@ function formatResult<T extends "h" | "x">(
   const alts: (Alternation[] & { source: string })[] = []
   const body = result.flatMap<h | string>(seg => {
     if (typeof seg === "string") return [chatToXdPUA(seg)]
+    if (!Array.isArray(seg) && seg.legacy)
+      seg = [{ content: [seg], note: "旧拼写", exceptional: true, legacy: true }]
     if (Array.isArray(seg)) {
       const source = seg[0].content.map(s => s[sourceType]).join("")
-      const legacyOnly = !seg[0].legacy && seg.slice(1).every(alt => alt.legacy)
+      const legacyOnly = seg.slice(1).every(alt => alt.legacy)
+      const els = []
       let className = "selectable"
-      if (legacyOnly) className += " selectable-legacyonly"
-      const els = [ruby(seg[0].content, className)]
+      if (legacyOnly && seg[0].legacy) {
+        els.push(<span class="char-legacy">{source}</span>)
+      } else {
+        if (legacyOnly) className += " selectable-legacyonly"
+        els.push(ruby(seg[0].content, className))
+      }
 
       if (all || (sourceType === "h" && !legacyOnly)) {
         let index = alts.findIndex(s => s.source === source)
@@ -107,7 +114,8 @@ function formatResult<T extends "h" | "x">(
     return [ruby([seg])]
   })
 
-  const footnotes = alts.map(seg => {
+  const footnotes = alts.map((seg: Alternation[]) => {
+    if (!single && !all) seg = seg.filter(alt => !alt.legacy)
     return (
       <li>
         {seg[0].content.map(seg => seg[sourceType]).join("")}:
