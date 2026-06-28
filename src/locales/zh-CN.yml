@@ -28,6 +28,7 @@ commands:
     options:
       legacy: 只搜索旧拼写
       legacy.false: 不包括旧拼写
+      showExceptional: 显示所有繁体、异体字
       perPage: 每页结果数
       page: 页码（从 1 开始，为 0 则随机显示）
     messages:

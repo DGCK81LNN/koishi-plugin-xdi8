@@ -28,6 +28,7 @@ commands:
     options:
       legacy: legacy spellings only
       legacy.false: exclude legacy spellings
+      showExceptional: show all traditional and variant Hanzi
       perPage: results per page
       page: page number (1-based, 0 for random samples)
     messages:

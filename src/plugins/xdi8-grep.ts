@@ -43,6 +43,7 @@ export function apply(ctx: Context, config: Config) {
     })
     .option("legacy", "-l")
     .option("legacy", "-L, --no-legacy", { value: false })
+    .option("showExceptional", "-e")
     .option("perPage", "-n <n:natural>", { fallback: 20 })
     .option("page", "-p <p:natural>")
     .action((argv, pattern) => {
@@ -75,11 +76,13 @@ export function apply(ctx: Context, config: Config) {
             session.i18n(".invalid-pattern-with-expr", [pattern])
           : session.i18n(".invalid-pattern")
 
-      let entries = ctx.xdi8.xdi8ToHanziTranscriber.dict.filter(
-        entry =>
-          entry.x.match(re) &&
-          !(Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h)),
-      )
+      let entries = ctx.xdi8.xdi8ToHanziTranscriber.dict.filter(entry => {
+        if (!entry.x.match(re)) return false
+        if (Object.hasOwn(ahoFixes, entry.x) && !ahoFixes[entry.x].includes(entry.h))
+          return false
+        if (!options.showExceptional && entry.xh === "-" && entry.hh !== "-") return false
+        return true
+      })
       if (!entries.length)
         return repeatInput ?
             session.i18n(".no-result-with-expr", [pattern])
