@@ -68,6 +68,14 @@ function ruby(chars: Omit<TranscribedSegment, "v">[], className?: string) {
   return <span class={className}>{ruby}</span>
 }
 
+function altNote(alt: Alternation) {
+  return (
+    <div>
+      {ruby(alt.content)} <span class="note">{alt.note}</span>
+    </div>
+  )
+}
+
 function formatResult<T extends "h" | "x">(
   result: TranscribeResult,
   sourceType: T,
@@ -78,30 +86,38 @@ function formatResult<T extends "h" | "x">(
       const text = chatToXdPUA(result[0])
       if (text.match(/[\ue000-\uf7ff\u21E7\u21E9]/)) return [text]
     }
-    result.length = 0
+    return
   }
   if (!result.length) return
 
-  const single = result.length === 1 && Array.isArray(result[0])
+  // add footnote to unique legacy spellings
+  result = result.map(seg => {
+    if (typeof seg === "object" && !Array.isArray(seg) && seg.legacy)
+      return [{ content: [seg], note: "旧拼写", exceptional: true, legacy: true }]
+    return seg
+  })
+
+  const single =
+    result.length === 1 && Array.isArray(result[0]) && (sourceType === "h" || all)
 
   const alts: (Alternation[] & { source: string })[] = []
   const body = result.flatMap<h | string>(seg => {
     if (typeof seg === "string") return [chatToXdPUA(seg)]
-    if (!Array.isArray(seg) && seg.legacy)
-      seg = [{ content: [seg], note: "旧拼写", exceptional: true, legacy: true }]
     if (Array.isArray(seg)) {
       const source = seg[0].content.map(s => s[sourceType]).join("")
-      const legacyOnly = seg.slice(1).every(alt => alt.legacy)
-      const els = []
-      let className = "selectable"
-      if (legacyOnly && seg[0].legacy) {
-        els.push(<span class="char-legacy">{source}</span>)
-      } else {
-        if (legacyOnly) className += " selectable-legacyonly"
-        els.push(ruby(seg[0].content, className))
-      }
+      const legacyAltsOnly = seg.slice(1).every(alt => alt.legacy)
+      const allLegacy = legacyAltsOnly && seg[0].legacy
 
-      if (all || (sourceType === "h" && !legacyOnly)) {
+      const wordEl =
+        allLegacy ?
+          <span class="char-legacy">{chatToXdPUA(source)}</span>
+        : ruby(seg[0].content)
+      const els = [wordEl]
+      if (all || (sourceType === "h" && !legacyAltsOnly)) {
+        let className = "selectable"
+        if (legacyAltsOnly) className += " selectable-legacyonly"
+        wordEl.attrs.class = className
+
         let index = alts.findIndex(s => s.source === source)
         if (index === -1) {
           index = alts.length
@@ -114,16 +130,18 @@ function formatResult<T extends "h" | "x">(
     return [ruby([seg])]
   })
 
+  if (alts.length === 1 && alts[0].length === 1) {
+    return altNote(alts[0][0])
+  }
+
   const footnotes = alts.map((seg: Alternation[]) => {
     if (!single && !all) seg = seg.filter(alt => !alt.legacy)
     return (
       <li>
-        {seg[0].content.map(seg => seg[sourceType]).join("")}:
+        {chatToXdPUA(seg[0].content.map(seg => seg[sourceType]).join(""))}:
         <ul class="alternations">
           {seg.map(alt => (
-            <li class="alternation">
-              {ruby(alt.content)} <span class="note">{alt.note}</span>
-            </li>
+            <li class="alternation">{altNote(alt)}</li>
           ))}
         </ul>
       </li>
@@ -143,7 +161,8 @@ export function apply(ctx: Context, config: Config) {
       checkUnknown: true,
     })
     .option("all", "-a")
-    .option("x2h", "-x")
+    .option("encode", "-e", { hidden: true })
+    .option("x2h", "-x, -d, --decode")
     .action(({ options: { all, x2h }, session }, text) => {
       const result = (x2h ? xhTranscribe : hxTranscribe)(ctx, text)
       const visual = formatResult(result, x2h ? "x" : "h", { all })
